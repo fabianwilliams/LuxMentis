@@ -1,5 +1,6 @@
 ﻿using Microsoft.SemanticKernel;
 using System;
+using System.Net;
 
 var endpoint = new Uri("http://localhost:11434");
 var modelId = "llama3.1:70b";
@@ -17,7 +18,7 @@ var kernel = kernelBuilder.Build();
 // Define the Semantic Kernel prompt which ACTS as a PERSONA
 const string skPrompt = @"
 GraphChangeLogBot can let you know recent changes in the Microsoft Graph ChangeLog.
-It will provide you Title, Description, and date of change for the most recent items.
+It will provide you Title, Description, and published date of change for the most recent items, including links.
 
 Here are the most recent items:
 {{ $pluginFeed }}
@@ -43,8 +44,8 @@ var getFeedFunction = kernel.Plugins.GetFunction("GraphChangelog", "get_formatte
 
 while (true)
 {
-    // Ask the user if they want to continue
-    Console.Write("Would you like to see the most recent Graph changes? (yes/quit): ");
+    // Ask the user for input
+    Console.Write("Tell me what areas on the Microsoft Graph you are looking for changes in? or type quit to exit: ");
     var userInput = Console.ReadLine();
 
     // Exit the loop if the user types "quit"
@@ -55,10 +56,16 @@ while (true)
     }
 
     // Update the user input in arguments
-    arguments["userInput"] = "Show me the most recent Graph changes";
+    arguments["userInput"] = userInput;
 
     // Invoke the plugin method to get the formatted feed (no filtering, just top 10 most recent)
-    var pluginFeed = await kernel.InvokeAsync(getFeedFunction, arguments);
+    var pluginFeedResult = await kernel.InvokeAsync(getFeedFunction, arguments);
+    
+    // Extract the string result from FunctionResult using GetValue
+    var pluginFeed = pluginFeedResult.GetValue<string>();
+
+    // Ensure the pluginFeed contains proper links by checking for HTML encoding issues
+    pluginFeed = WebUtility.HtmlDecode(pluginFeed);
 
     // Set the pluginFeed in the arguments to pass to the chatFunction
     arguments["pluginFeed"] = pluginFeed;

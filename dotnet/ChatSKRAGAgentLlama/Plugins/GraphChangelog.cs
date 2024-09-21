@@ -10,6 +10,7 @@ using SimpleFeedReader;
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using System.Text.RegularExpressions;
 
 public class GraphChangelog
 {
@@ -28,16 +29,33 @@ public class GraphChangelog
             var items = (from item in xdoc.Descendants("item")
                          select new RSSItem
                          {
-                             Title = item.Element("title")?.Value,
-                             Link = item.Element("link")?.Value,  // Extract the link element
-                             Description = WebUtility.HtmlDecode(item.Element("description")?.Value),
+                             Title = WebUtility.HtmlDecode(item.Element("title")?.Value),
+                             Link = WebUtility.HtmlDecode(item.Element("link")?.Value),
+                             Description = CleanHtml(WebUtility.HtmlDecode(item.Element("description")?.Value)),
                              PublishDate = DateTime.TryParse(item.Element("pubDate")?.Value, out var date) ? date : DateTime.MinValue
                          }).OrderByDescending(i => i.PublishDate)  // Sort by publish date (most recent first)
                            .Take(10)  // Take the top 10 items
                            .ToList();
 
+            // Log each item to the console for debugging
+            foreach (var item in items)
+            {
+                Console.WriteLine($"Title: {item.Title}");
+                Console.WriteLine($"Link: {item.Link}");
+                Console.WriteLine($"Description: {item.Description}");
+                Console.WriteLine($"Publish Date: {item.PublishDate}");
+            }
+
             return items;
         }
+    }
+
+    // Helper method to clean HTML content from the description, preserving anchor tags
+    private string CleanHtml(string input)
+    {
+        // Preserve anchor tags, remove other HTML tags
+        var regex = new Regex(@"<(?!(a|/a)).*?>");
+        return regex.Replace(input, string.Empty);
     }
 
     // Helper method to format the output for the LLM
@@ -49,8 +67,8 @@ public class GraphChangelog
         {
             // Format each RSS item with title, link, description, and publish date
             formattedOutput += $"**Title:** {item.Title}\n";
-            formattedOutput += $"**Link:** {item.Link}\n";  // Include the link in the output
-            formattedOutput += $"**Description:** {item.Description}\n";
+            formattedOutput += $"**Link:** [{item.Link}]({item.Link})\n";  // Use Markdown style for clickable link
+            formattedOutput += $"**Description:** {item.Description}\n";  // Clean description, preserving anchor tags
             formattedOutput += $"**Publish Date:** {item.PublishDate}\n\n";
         }
 
@@ -59,7 +77,7 @@ public class GraphChangelog
 
     // Updated Plugin Method to fetch the top 10 most recent items from the Microsoft Graph RSS feed
     [KernelFunction("get_formatted_graphlog_feed")]
-    [Description("Fetches the top 10 most recent items from the Microsoft Graph RSS feed and returns a formatted string")]
+    [Description("Fetches the top 10 most recent items from the Microsoft Graph RSS feed and returns a formatted string with Title, Link, Description, and Publish Date")]
     [return: Description("The formatted feed for Microsoft Graph Changelog items as a string")]
     public async Task<string> GetFormattedChangeLogFeedAsync()
     {
