@@ -39,7 +39,7 @@ var arguments = new KernelArguments
     ["pluginFeed"] = ""  // To display the pluginFeed properly
 };
 
-// Get the GraphChangelog plugin function
+// Load the GraphChangelog plugin function
 var getFeedFunction = kernel.Plugins.GetFunction("GraphChangelog", "get_formatted_graphlog_feed");
 
 while (true)
