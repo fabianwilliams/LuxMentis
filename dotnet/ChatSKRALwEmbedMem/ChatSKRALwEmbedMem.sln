@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.002.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ChatSKRALwEmbedMem", "ChatSKRALwEmbedMem.csproj", "{AEB2C7AF-C5DB-4EC5-A268-5CF46EF1A318}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{AEB2C7AF-C5DB-4EC5-A268-5CF46EF1A318}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AEB2C7AF-C5DB-4EC5-A268-5CF46EF1A318}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AEB2C7AF-C5DB-4EC5-A268-5CF46EF1A318}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AEB2C7AF-C5DB-4EC5-A268-5CF46EF1A318}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {C704923B-CA13-4B60-9845-8B1647806ECB}
+	EndGlobalSection
+EndGlobal
