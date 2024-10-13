@@ -69,12 +69,14 @@ namespace WebPageEmbeddingToQdrant
             var client = new QdrantClient(grpcClient);
 
             // Ensure the collection exists
-            await client.CreateCollectionAsync("fringetv_embeddings",
-                new VectorParams { Size = 384, Distance = Distance.Cosine });
+            await client.CreateCollectionAsync("fringetv_embeddings_1024",
+                //new VectorParams { Size = 384, Distance = Distance.Cosine });
+                new VectorParams { Size = 1024, Distance = Distance.Cosine });
 
             // Generate embeddings using Ollama
             IEmbeddingGenerator<string, Embedding<float>> generator =
-                new OllamaEmbeddingGenerator(new Uri("http://localhost:11434/"), "all-minilm:33m");
+                //new OllamaEmbeddingGenerator(new Uri("http://localhost:11434/"), "all-minilm:33m");
+                new OllamaEmbeddingGenerator(new Uri("http://localhost:11434/"),"mxbai-embed-large:latest");
 
             // Split the text into chunks for embedding generation
             var chunks = SplitTextIntoChunks(text, maxChunkSize: 1000);
@@ -96,7 +98,7 @@ namespace WebPageEmbeddingToQdrant
                         Vectors = embeddingArray,
                         Payload = {
                             ["url"] = url,
-                            ["chunk"] = chunk.Substring(0, Math.Min(chunk.Length, 50)) + "...", // Metadata about the chunk
+                            ["chunk"] = chunk.Substring(0, Math.Min(chunk.Length, 200)) + "...", // Metadata about the chunk
                             ["index"] = index
                         }
                     };
@@ -105,7 +107,7 @@ namespace WebPageEmbeddingToQdrant
             }
 
             // Upsert the embeddings into Qdrant
-            var updateResult = await client.UpsertAsync("fringetv_embeddings", (IReadOnlyList<Qdrant.Client.Grpc.PointStruct>)points);
+            var updateResult = await client.UpsertAsync("fringetv_embeddings_1024", (IReadOnlyList<Qdrant.Client.Grpc.PointStruct>)points);
             Console.WriteLine($"Embeddings for {url} upserted to Qdrant.");
         }
 
