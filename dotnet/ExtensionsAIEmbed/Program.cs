@@ -61,6 +61,7 @@ namespace WebPageEmbedding
             IEmbeddingGenerator<string, Embedding<float>> generator =
                 new OllamaEmbeddingGenerator(new Uri("http://localhost:11434/"), "all-minilm:33m");
 
+
             // For large texts, you may want to split the text into smaller chunks
             var chunks = SplitTextIntoChunks(text, maxChunkSize: 1000);
 
