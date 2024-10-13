@@ -13,7 +13,7 @@ namespace WebPageEmbeddingSearch
         static async Task Main(string[] args)
         {
             // The term you want to search for (using partial match)
-            var searchTerm = "Observers";  // Adjusted for partial matches
+            var searchTerm = "Walternate";  // Adjusted for partial matches
 
             // Generate embedding for the search term
             var searchEmbedding = await GenerateEmbeddingForQueryAsync(searchTerm);
@@ -27,7 +27,9 @@ namespace WebPageEmbeddingSearch
         {
             IEmbeddingGenerator<string, Embedding<float>> generator =
                 //new OllamaEmbeddingGenerator(new Uri("http://localhost:11434/"), "all-minilm:33m");
-                new OllamaEmbeddingGenerator(new Uri("http://localhost:11434/"),"mxbai-embed-large:latest");
+                //new OllamaEmbeddingGenerator(new Uri("http://localhost:11434/"),"mxbai-embed-large:latest");
+                new OllamaEmbeddingGenerator(new Uri("http://localhost:11434/"),"rjmalagon/gte-qwen2-1.5b-instruct-embed-f16:latest"); //Needed for 1536 dimensions which is what Semantic Kernel needs
+
 
             var embedding = await generator.GenerateAsync(query);
 
@@ -55,7 +57,7 @@ namespace WebPageEmbeddingSearch
             {
                 // Search Qdrant for the closest points to the search term embedding
                 var results = await client.SearchAsync(
-                    "fringetv_embeddings_1024",  // The collection where embeddings are stored alternat between 384 and 1024 dimensions
+                    "fringetv_embeddings_1536",  // The collection where embeddings are stored alternat between 384 and 1024 and 1536dimensions
                     embedding,              // The query embedding vector
                     limit: (ulong)limit,           // Limit for pagination
                     offset: (ulong)offset          // Offset to paginate

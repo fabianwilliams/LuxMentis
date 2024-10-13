@@ -69,14 +69,16 @@ namespace WebPageEmbeddingToQdrant
             var client = new QdrantClient(grpcClient);
 
             // Ensure the collection exists
-            await client.CreateCollectionAsync("fringetv_embeddings_1024",
+            await client.CreateCollectionAsync("fringetv_embeddings_1536",
                 //new VectorParams { Size = 384, Distance = Distance.Cosine });
-                new VectorParams { Size = 1024, Distance = Distance.Cosine });
+                //new VectorParams { Size = 1024, Distance = Distance.Cosine });
+                new VectorParams { Size = 1536, Distance = Distance.Cosine }); // WE NEED this for Semantic Kernel vector search to work
 
             // Generate embeddings using Ollama
             IEmbeddingGenerator<string, Embedding<float>> generator =
                 //new OllamaEmbeddingGenerator(new Uri("http://localhost:11434/"), "all-minilm:33m");
-                new OllamaEmbeddingGenerator(new Uri("http://localhost:11434/"),"mxbai-embed-large:latest");
+                //new OllamaEmbeddingGenerator(new Uri("http://localhost:11434/"),"mxbai-embed-large:latest");
+                new OllamaEmbeddingGenerator(new Uri("http://localhost:11434/"),"rjmalagon/gte-qwen2-1.5b-instruct-embed-f16:latest"); //Needed for 1536 dimensions which is what Semantic Kernel needs
 
             // Split the text into chunks for embedding generation
             var chunks = SplitTextIntoChunks(text, maxChunkSize: 1000);
@@ -107,7 +109,7 @@ namespace WebPageEmbeddingToQdrant
             }
 
             // Upsert the embeddings into Qdrant
-            var updateResult = await client.UpsertAsync("fringetv_embeddings_1024", (IReadOnlyList<Qdrant.Client.Grpc.PointStruct>)points);
+            var updateResult = await client.UpsertAsync("fringetv_embeddings_1536", (IReadOnlyList<Qdrant.Client.Grpc.PointStruct>)points);
             Console.WriteLine($"Embeddings for {url} upserted to Qdrant.");
         }
 
