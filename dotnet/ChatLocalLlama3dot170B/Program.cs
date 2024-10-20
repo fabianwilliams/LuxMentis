@@ -1,5 +1,6 @@
 ﻿using Microsoft.SemanticKernel;
 using System;
+using System.ClientModel.Primitives;
 
 var endpoint = new Uri("http://localhost:11434");
 var modelId = "llama3.1:70b";
@@ -7,10 +8,13 @@ var modelId = "llama3.1:70b";
 // Disable specific warnings
 #pragma warning disable SKEXP0010
 var kernelBuilder = Kernel.CreateBuilder()
+    .AddVolatileVectorStore()
     .AddOpenAIChatCompletion(modelId: modelId, apiKey: null, endpoint: endpoint);
 #pragma warning restore SKEXP0010
 
 var kernel = kernelBuilder.Build();
+
+
 
 // Define the Semantic Kernel prompt
 const string skPrompt = @"

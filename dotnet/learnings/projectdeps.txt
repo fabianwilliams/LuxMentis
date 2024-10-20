@@ -1,0 +1,2 @@
+    <PackageReference Include="Microsoft.SemanticKernel" Version="1.18.2" />
+    <PackageReference Include="Microsoft.SemanticKernel.Plugins.Core" Version="1.2.0-alpha" />
