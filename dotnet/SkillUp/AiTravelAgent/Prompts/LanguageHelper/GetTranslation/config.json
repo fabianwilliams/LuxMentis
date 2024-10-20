@@ -1,0 +1,23 @@
+{
+    "schema": 1,
+    "type": "completion",
+    "description": "Recommend a list of helpful phrases in a given language",
+    "execution_settings": {
+        "default": {
+            "max_tokens": 6000,
+            "temperature": 0.5
+        }
+    },
+    "input_variables": [
+        {
+            "name": "language",
+            "description": "The language to translate the text to",
+            "required": true
+        },
+        {
+          "name": "input",
+          "description": "The text to translate",
+          "required": false
+      }
+    ]
+  }

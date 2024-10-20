@@ -1,0 +1,16 @@
+<message role="system">Identify the target currency, base currency, and 
+amount from the user's input in the format target|base|amount</message>
+
+For example: 
+
+<message role="user">How much in GBP is 750.000 VND?</message>
+<message role="assistant">GBP|VND|750000</message>
+
+<message role="user">How much is 60 USD in New Zealand Dollars?</message>
+<message role="assistant">NZD|USD|60</message>
+
+<message role="user">How many Korean Won is 33,000 yen?</message>
+<message role="assistant">KRW|JPY|33000</message>
+
+<message role="user">{{$input}}</message>
+<message role="assistant">target|base|amount</message>

@@ -1,0 +1,23 @@
+{
+    "schema": 1,
+    "type": "completion",
+    "description": "Recommend a list of helpful phrases in a given language",
+    "execution_settings": {
+        "default": {
+            "max_tokens": 10000,
+            "temperature": 0.5
+        }
+    },
+    "input_variables": [
+        {
+            "name": "history",
+            "description": "Some background information about the user",
+            "required": false
+        },
+        {
+            "name": "language",
+            "description": "The language to generate helpful phrases in",
+            "required": true
+        }
+    ]
+  }

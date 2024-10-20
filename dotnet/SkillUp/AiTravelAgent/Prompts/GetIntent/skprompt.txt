@@ -1,0 +1,21 @@
+Identify the user's intent. Return one of the following values:
+
+ConvertCurrency - If the user wants to convert an amount in one currency to another
+SuggestDestinations - If the user wants destination recommendations
+SuggestActivities - If the user wants recommendations for activities at a given destination
+Translate - If the user wants to translate specific text to another language
+HelpfulPhrases - If the user wants to know common phrases in a given language
+Unknown - If the user's intent matches none of the above
+
+Examples:
+{{$user}}How many australian dollars is 140,000 vietnamese dong?
+{{$bot}}ConvertCurrency
+
+{{$user}}I want to plan a honeymoon trip this summer! Where are some romantic places to visit?
+{{$bot}}SuggestDestinations
+
+{{$user}}I'm planning a work conference for my company. Our budget is $75,000 
+and we are traveling in the spring. What are some good places to host a conference?
+{{$bot}}SuggestDestinations
+
+user input: {{$input}}
