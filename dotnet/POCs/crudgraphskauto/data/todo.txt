@@ -1,0 +1,72 @@
+[
+  {
+    "person": "Vincent",
+    "task": "Finalize Sprint Goals",
+    "task_details": "Set and finalize the goals for the upcoming sprint.",
+    "date": "2024-10-18",
+    "is_complete": false
+  },
+  {
+    "person": "Jessica",
+    "task": "Prepare Client Feedback Summary",
+    "task_details": "Summarize the latest client feedback for the team.",
+    "date": "2024-10-20",
+    "is_complete": true
+  },
+  {
+    "person": "Barry",
+    "task": "Review Tech Stack",
+    "task_details": "Review the new proposed technology stack for the project.",
+    "date": "2024-10-20",
+    "is_complete": false
+  },
+  {
+    "person": "Jada",
+    "task": "Prepare Sales Report",
+    "task_details": "Complete the sales report for the last quarter.",
+    "date": "2024-10-12",
+    "is_complete": true
+  },
+  {
+    "person": "VINCENT",
+    "task": "RESPOND TO EMAIL REGARDING SPRINT PLANNING",
+    "task_details": "DISCUSS THE FINALIZED GOALS FOR THE UPCOMING SPRINT",
+    "date": "2024-10-20",
+    "is_complete": false
+  },
+  {
+    "person": "GLADYS",
+    "task": "UPDATE ON PROJECT UPDATE",
+    "task_details": "PROVIDE AN UPDATE ON THE CURRENT PROJECT STATUS",
+    "date": "2024-10-20",
+    "is_complete": false
+  },
+  {
+    "person": "JESSICA",
+    "task": "SUMMARIZE CLIENT FEEDBACK AND PREPARE FOR NEXT STEPS",
+    "task_details": "FINALIZE A SUMMARY OF THE CLIENT FEEDBACK AND REVIEW WITH RELEVANT TEAMS",
+    "date": "2024-10-20",
+    "is_complete": false
+  },
+  {
+    "person": "VINCENT",
+    "task": "RESPOND TO EMAIL REGARDING SPRINT PLANNING",
+    "task_details": "DISCUSS THE FINALIZED GOALS FOR THE UPCOMING SPRINT",
+    "date": "2024-10-20",
+    "is_complete": false
+  },
+  {
+    "person": "GLADYS",
+    "task": "UPDATE ON PROJECT UPDATE",
+    "task_details": "PROVIDE AN UPDATE ON THE CURRENT PROJECT STATUS",
+    "date": "2024-10-20",
+    "is_complete": false
+  },
+  {
+    "person": "JESSICA",
+    "task": "SUMMARIZE CLIENT FEEDBACK AND PREPARE FOR NEXT STEPS",
+    "task_details": "FINALIZE A SUMMARY OF THE CLIENT FEEDBACK AND REVIEW WITH RELEVANT TEAMS",
+    "date": "2024-10-20",
+    "is_complete": false
+  }
+]

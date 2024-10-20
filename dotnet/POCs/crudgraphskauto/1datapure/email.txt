@@ -1,0 +1,82 @@
+[
+    {
+        "person": "Gladys",
+        "email_subject": "Project Update",
+        "email_body": "Hey, just wanted to give you a quick update on the project. We’re nearly there!",
+        "date_received": "2024-10-18",
+        "is_important": true,
+        "is_read": false
+    },
+    {
+        "person": "Vesa",
+        "email_subject": "Follow-up on Task",
+        "email_body": "Can we get an update on the pending task?",
+        "date_received": "2024-10-19",
+        "is_important": true,
+        "is_read": false
+    },
+    {
+        "person": "Jeremy",
+        "email_subject": "Meeting Agenda",
+        "email_body": "Here’s the agenda for tomorrow’s meeting.",
+        "date_received": "2024-10-20",
+        "is_important": true,
+        "is_read": true
+    },
+    {
+        "person": "Seb",
+        "email_subject": "Code Review",
+        "email_body": "Can you take a look at the recent code changes?",
+        "date_received": "2024-10-19",
+        "is_important": false,
+        "is_read": true
+    },
+    {
+        "person": "Vincent",
+        "email_subject": "Sprint Planning",
+        "email_body": "We need to finalize the details for the upcoming sprint.",
+        "date_received": "2024-10-18",
+        "is_important": true,
+        "is_read": false
+    },
+    {
+        "person": "Jessica",
+        "email_subject": "Client Feedback",
+        "email_body": "Here’s some feedback from the client after our last session.",
+        "date_received": "2024-10-20",
+        "is_important": true,
+        "is_read": false
+    },
+    {
+        "person": "Barry",
+        "email_subject": "Technical Specs",
+        "email_body": "Please review the technical specifications for the project.",
+        "date_received": "2024-10-19",
+        "is_important": false,
+        "is_read": true
+    },
+    {
+        "person": "Luis",
+        "email_subject": "Budget Update",
+        "email_body": "We need to review the budget for Q4.",
+        "date_received": "2024-10-18",
+        "is_important": true,
+        "is_read": false
+    },
+    {
+        "person": "Gabby",
+        "email_subject": "Marketing Plan",
+        "email_body": "I’ve attached the draft of the marketing plan for your review.",
+        "date_received": "2024-10-20",
+        "is_important": true,
+        "is_read": false
+    },
+    {
+        "person": "Jada",
+        "email_subject": "Sales Report",
+        "email_body": "Here is the sales report for the last quarter.",
+        "date_received": "2024-10-18",
+        "is_important": false,
+        "is_read": true
+    }
+]

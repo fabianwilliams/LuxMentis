@@ -1,0 +1,51 @@
+[
+    {
+        "person": "Gladys",
+        "event_title": "Project Planning",
+        "event_details": "Discuss the next steps in the project.",
+        "date": "2024-10-21",
+        "time_blocked": "09:00 AM - 10:00 AM"
+    },
+    {
+        "person": "Seb",
+        "event_title": "Code Review",
+        "event_details": "Review the latest changes in the project codebase.",
+        "date": "2024-10-19",
+        "time_blocked": "12:00 PM - 01:00 PM"
+    },
+    {
+        "person": "Vincent",
+        "event_title": "Sprint Planning",
+        "event_details": "Plan the tasks for the upcoming sprint.",
+        "date": "2024-10-21",
+        "time_blocked": "02:00 PM - 03:00 PM"
+    },
+    {
+        "person": "Jessica",
+        "event_title": "Client Meeting",
+        "event_details": "Discuss the latest client feedback and next steps.",
+        "date": "2024-10-22",
+        "time_blocked": "03:00 PM - 04:00 PM"
+    },
+    {
+        "person": "Barry",
+        "event_title": "Tech Sync",
+        "event_details": "Technical discussion with the engineering team.",
+        "date": "2024-10-20",
+        "time_blocked": "04:00 PM - 05:00 PM"
+    },
+    {
+        "person": "Luis",
+        "event_title": "Budget Review",
+        "event_details": "Review the upcoming project’s budget for Q4.",
+        "date": "2024-10-21",
+        "time_blocked": "09:00 AM - 10:00 AM"
+    },
+    {
+        "person": "Gabby",
+        "event_title": "Marketing Strategy",
+        "event_details": "Go over the draft marketing strategy for the next quarter.",
+        "date": "2024-10-20",
+        "time_blocked": "10:00 AM - 11:00 AM"
+    }
+]

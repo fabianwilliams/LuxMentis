@@ -1,0 +1,28 @@
+{
+    "schema": 1,
+    "type": "completion",
+    "description": "Check unread emails, create ToDo tasks, and block calendar time",
+    "execution_settings": {
+        "default": {
+            "max_tokens": 5000,
+            "temperature": 0
+        }
+    },
+    "input_variables": [
+        {
+            "name": "importantEmails",
+            "description": "List of unread important emails",
+            "required": true
+        },
+        {
+            "name": "incompleteTasks",
+            "description": "Number of incomplete tasks",
+            "required": true
+        },
+        {
+            "name": "blockedTime",
+            "description": "Time slots to block in the calendar",
+            "required": true
+        }
+    ]
+}

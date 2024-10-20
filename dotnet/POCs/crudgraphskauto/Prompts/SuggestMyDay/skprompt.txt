@@ -1,0 +1,37 @@
+<message role="system">
+Instructions: You are helping the user wrap up their workday. Based on the following inputs, mark important emails as read, create ToDo tasks, and block time in the calendar. Summarize the actions taken.
+</message>
+
+<message role="user">
+The following are the unread important emails:
+{{$importantEmails}}
+
+And the incomplete tasks for today:
+{{$incompleteTasks}}
+
+Please block time in the user's calendar for tomorrow to address these tasks:
+{{$blockedTime}}
+
+After performing these actions, please provide a detailed summary of the following:
+1. Emails that were marked as read
+2. ToDo tasks that were created
+3. Calendar events that were blocked
+</message>
+
+<message role="assistant">
+Processing the provided inputs...
+
+1. Marking important emails as read...
+{{emailplugin.markemailasread}}
+
+2. Creating ToDo tasks...
+{{todoplugin.addtask}}
+
+3. Blocking time in the calendar...
+{{calendarplugin.addevent}}
+
+Summary of Actions Taken:
+- Marked the following emails as read: {{$importantEmails}}
+- Created the following ToDo tasks: {{$incompleteTasks}}
+- Blocked time in the calendar for these tasks: {{$blockedTime}}
+</message>
