@@ -1,0 +1,27 @@
+[
+  {
+    "title": "Danse",
+    "artist": "Tiara",
+    "genre": "French pop, electropop, pop"
+  },
+  {
+    "title": "Loanh Quanh",
+    "artist": "Ly Hoa",
+    "genre": "indie, folk"
+  },
+  {
+    "title": "Kalam Eineh",
+    "artist": "Yasemin",
+    "genre": "pop, Egyptian pop"
+  },
+  {
+    "title": "I Miss You",
+    "artist": "Chishin",
+    "genre": "hiphop, rap"
+  },
+  {
+    "title": "4EVER",
+    "artist": "Gaby",
+    "genre": "alternative, indie"
+  }
+]
