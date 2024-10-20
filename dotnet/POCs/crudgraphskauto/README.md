@@ -52,16 +52,16 @@ This setup does not handle **authentication** or **permissions**. In a real-worl
 Here are some screenshots of the **POC in action**, showing the tasks that were performed based on the prompt provided.
 
 ### Task Output in Terminal:
-![Task Output](./images/FFE93165-80D6-496F-8D35-4D06B248C5A2.png)
+![Task Output](/images/consoleoutput.png)
 
 ### Code Structure:
-![Code Structure](./images/EB39BB13-2EA9-4259-9A1B-AA4CF14E461A.png)
+![Code Structure](/images/programcstop.png)
 
-### Calendar and ToDo Files:
-![Calendar and ToDo](./images/3C1B9589-0704-47A9-8A53-CDB06A9DC8E2.png)
+### ToDo Files:
+![Calendar and ToDo](/images/todowithaddeditems.png)
 
 ### Summary of Actions:
-![Summary of Actions](./images/C5E22CAE-BDDA-42A1-80A8-9D2C31673B10.png)
+![Summary of Actions](/images/projectview.png)
 
 ## Conclusion
 
