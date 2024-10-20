@@ -4,7 +4,7 @@
     "description": "Check unread emails, create ToDo tasks, and block calendar time",
     "execution_settings": {
         "default": {
-            "max_tokens": 5000,
+            "max_tokens": 10000,
             "temperature": 0
         }
     },
