@@ -1,17 +1,20 @@
-﻿using Microsoft.SemanticKernel;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.Connectors.OpenAI;
 using System;
 
 // Disable specific warnings
 #pragma warning disable SKEXP0010, SKEXP0050, SKEXP0001
 
-var endpoint = new Uri("http://localhost:11434");
+var endpoint = new Uri("http://localhost:11434/v1");
 var modelId = "llama3.2:1b";
 
 // Build the kernel and import plugins
 var builder = Kernel.CreateBuilder()
     .AddOpenAIChatCompletion(modelId: modelId, apiKey: null, endpoint: endpoint);
 
+builder.Services.AddLogging(c => c.AddDebug().SetMinimumLevel(LogLevel.Trace));
 var kernel = builder.Build();
 
 // Import plugins for emails, calendar, and todo tasks
