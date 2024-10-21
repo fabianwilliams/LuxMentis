@@ -28,17 +28,17 @@
     "time_blocked": "09:00 AM - 10:00 AM"
   },
   {
-    "person": "VINCENT",
-    "event_title": "RESPOND TO UNREAD EMAILS - VINCENT",
-    "event_details": "RESPOND TO UNREAD IMPORTANT EMAILS FROM VINCENT.",
+    "person": "JEREMY",
+    "event_title": "FOLLOW UP ON MEETING AGENDA - JEREMY",
+    "event_details": "ADDRESS THE EMAIL THAT WAS SENT EARLIER TO PREPARE FOR TOMORROWS MEETING.",
     "date": "2024-10-21",
-    "time_blocked": "09:00 AM - 10:00 AM"
+    "time_blocked": "08:00 AM - 09:00 AM"
   },
   {
-    "person": "BARRY",
-    "event_title": "RESPOND TO UNREAD EMAILS - BARRY",
-    "event_details": "RESPOND TO UNREAD IMPORTANT EMAILS FROM BARRY.",
+    "person": "VINCENT",
+    "event_title": "FINALIZE SPRINT PLANNING WITH VINCE",
+    "event_details": "DISCUSS ALL THE FINAL ARRANGEMENTS FOR PLANNING THE UPCOMING SPRINT.",
     "date": "2024-10-21",
-    "time_blocked": "11:00 AM - 12:00 PM"
+    "time_blocked": "09:00 AM - 10:00 AM"
   }
 ]

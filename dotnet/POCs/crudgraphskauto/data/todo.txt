@@ -24,20 +24,20 @@
     "person": "Jada",
     "task": "Prepare Sales Report",
     "task_details": "Complete the sales report for the last quarter.",
-    "date": "2024-10-21",
-    "is_complete": true
-  },
-  {
-    "person": "VINCENT",
-    "task": "RESPOND TO IMPORTANT UNREAD EMAILS",
-    "task_details": "PLEASE RESPOND TO THE IMPORTANT UNREAD EMAILS.",
     "date": "2024-10-20",
     "is_complete": false
   },
   {
-    "person": "BARRY",
-    "task": "RESPOND TO IMPORTANT UNREAD EMAILS",
-    "task_details": "PLEASE RESPOND TO THE IMPORTANT UNREAD EMAILS.",
+    "person": "JEREMY",
+    "task": "FOLLOW UP ON MEETING AGENDA",
+    "task_details": "THE AGENDA FOR TOMORROW\u2019S MEETING WAS SENT, ADDRESS IT FIRST THING IN THE MORNING.",
+    "date": "2024-10-20",
+    "is_complete": false
+  },
+  {
+    "person": "VINCENT",
+    "task": "FINALIZE SPRINT DETAILS WITH VINCE",
+    "task_details": "FOLLOW UP AND FINALIZE ALL DETAILS FOR THE UPCOMING SPRINT ON MONDAY MORNING.",
     "date": "2024-10-20",
     "is_complete": false
   }
