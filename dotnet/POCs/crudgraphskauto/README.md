@@ -52,7 +52,7 @@ This setup does not handle **authentication** or **permissions**. In a real-worl
 Here are some screenshots of the **POC in action**, showing the tasks that were performed based on the prompt provided.
 
 ### Task Output in Terminal:
-![Task Output](/images/consoleoutput.png)
+![Task Output](https://github.com/fabianwilliams/LuxMentis/blob/main/dotnet/POCs/crudgraphskauto/images/programcstop.png)
 
 ### Code Structure:
 ![Code Structure](/images/programcstop.png)
