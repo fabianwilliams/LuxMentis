@@ -6,7 +6,7 @@ using System;
 #pragma warning disable SKEXP0010, SKEXP0050, SKEXP0001
 
 var endpoint = new Uri("http://localhost:11434");
-var modelId = "llama3.1:70b";
+var modelId = "llama3.2:1b";
 
 // Build the kernel and import plugins
 var builder = Kernel.CreateBuilder()
