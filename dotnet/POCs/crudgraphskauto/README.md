@@ -1,5 +1,5 @@
 
-# Proof of Concept (POC): Task Automation with Semantic Kernel
+# Proof of Concept (POC): Email, Task and Calendar Automation with Semantic Kernel
 
 ## **DISCLAIMER:**
 This project is not a recommended approach for building production-level task automation using Semantic Kernel. The setup used here is for **Proof of Concept (POC) purposes only** and should **not be seen as an endorsement** of the approach or as a demonstration of the art of the possible. The project makes several **simplifications** that would not hold up in a real-world, scalable application.
