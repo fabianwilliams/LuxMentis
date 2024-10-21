@@ -52,16 +52,16 @@ This setup does not handle **authentication** or **permissions**. In a real-worl
 Here are some screenshots of the **POC in action**, showing the tasks that were performed based on the prompt provided.
 
 ### Task Output in Terminal:
-![Task Output](/images/consoleoutput.png)
+![Task Output](https://github.com/fabianwilliams/LuxMentis/blob/main/dotnet/POCs/crudgraphskauto/images/consoleoutput.png)
 
 ### Code Structure:
-![Code Structure](/images/programcstop.png)
+![Code Structure](https://github.com/fabianwilliams/LuxMentis/blob/main/dotnet/POCs/crudgraphskauto/images/projectview.png)
 
 ### ToDo Files:
-![Calendar and ToDo](/images/todowithaddeditems.png)
+![Calendar and ToDo](https://github.com/fabianwilliams/LuxMentis/blob/main/dotnet/POCs/crudgraphskauto/images/todowithaddeditems.png)
 
 ### Summary of Actions:
-![Summary of Actions](/images/projectview.png)
+![Summary of Actions](https://github.com/fabianwilliams/LuxMentis/blob/main/dotnet/POCs/crudgraphskauto/images/programcstop.png)
 
 ## Conclusion
 
