@@ -4,6 +4,27 @@
 ## **DISCLAIMER:**
 This project is not a recommended approach for building production-level task automation using Semantic Kernel. The setup used here is for **Proof of Concept (POC) purposes only** and should **not be seen as an endorsement** of the approach or as a demonstration of the art of the possible. The project makes several **simplifications** that would not hold up in a real-world, scalable application.
 
+## Pre-reqs
+
+- Docker Desktop `winget install docker.dockerdesktop`
+- Dotnet SDK `winget install Microsoft.DotNet.SDK.8`
+
+## Getting the environment ready
+
+```shell
+docker run -d -v <SomeLocalPath>:/root/.ollama -p 11434:11434 --name ollama ollama/ollama
+docker exec -it ollama ollama run llama3.2:1b
+```
+
+## Tearing down
+
+```shell
+docker stop ollama
+docker rm ollama
+docker rmi ollama/ollama
+rm -r <SomeLocalPath>
+```
+
 ## Scenario
 
 The goal of this project was to create a natural language-driven system that allows the user to summarize and organize tasks at the end of the day. Specifically, the user provides the following prompt:

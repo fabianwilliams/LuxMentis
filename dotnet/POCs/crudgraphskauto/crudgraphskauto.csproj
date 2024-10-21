@@ -12,4 +12,8 @@
     <PackageReference Include="Microsoft.SemanticKernel.Plugins.Core" Version="1.24.1-alpha" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Content Include="data/*.txt" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
 </Project>
