@@ -81,7 +81,8 @@ namespace SemanticKernelApp
             await AddApiManifestPluginsAsync(kernel, pluginsToLoad);
 
             // Get the function
-            var function = kernel.Skills.GetFunction(pluginToTest, functionToTest);
+            //var oldfunction = kernel.Skills.GetFunction(pluginToTest, functionToTest);
+            var function = kernel.ImportPluginFromFunctions(pluginToTest, functionToTest);
 
             if (function == null)
             {
