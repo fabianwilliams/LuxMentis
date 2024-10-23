@@ -29,6 +29,6 @@
     "email_body": "We need to finalize the details for the upcoming sprint.",
     "date_received": "2024-10-18",
     "is_important": true,
-    "is_read": true
+    "is_read": false
   }
 ]

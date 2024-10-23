@@ -28,17 +28,17 @@
     "time_blocked": "09:00 AM - 10:00 AM"
   },
   {
-    "person": "JEREMY",
-    "event_title": "FOLLOW UP ON MEETING AGENDA - JEREMY",
-    "event_details": "ADDRESS THE EMAIL THAT WAS SENT EARLIER TO PREPARE FOR TOMORROWS MEETING.",
+    "person": "VESA",
+    "event_title": "FOLLOW-UP ON TASK WITH VESA",
+    "event_details": "CAN WE GET AN UPDATE ON THE PENDING TASK?",
     "date": "2024-10-21",
-    "time_blocked": "08:00 AM - 09:00 AM"
+    "time_blocked": "07:00 AM - 08:00 AM"
   },
   {
     "person": "VINCENT",
-    "event_title": "FINALIZE SPRINT PLANNING WITH VINCE",
-    "event_details": "DISCUSS ALL THE FINAL ARRANGEMENTS FOR PLANNING THE UPCOMING SPRINT.",
+    "event_title": "[SPRINT PLANNING] MEETING",
+    "event_details": "WE NEED TO FINALIZE THE DETAILS FOR THE UPCOMING SPRINT.",
     "date": "2024-10-21",
-    "time_blocked": "09:00 AM - 10:00 AM"
+    "time_blocked": "08:00 AM - 09:00 AM"
   }
 ]

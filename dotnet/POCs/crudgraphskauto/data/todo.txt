@@ -11,14 +11,14 @@
     "task": "Prepare Client Feedback Summary",
     "task_details": "Summarize the latest client feedback for the team.",
     "date": "2024-10-20",
-    "is_complete": true
+    "is_complete": false
   },
   {
     "person": "Barry",
     "task": "Review Tech Stack",
     "task_details": "Review the new proposed technology stack for the project.",
     "date": "2024-10-22",
-    "is_complete": false
+    "is_complete": true
   },
   {
     "person": "Jada",
@@ -28,17 +28,17 @@
     "is_complete": false
   },
   {
-    "person": "JEREMY",
-    "task": "FOLLOW UP ON MEETING AGENDA",
-    "task_details": "THE AGENDA FOR TOMORROW\u2019S MEETING WAS SENT, ADDRESS IT FIRST THING IN THE MORNING.",
-    "date": "2024-10-20",
+    "person": "VESA",
+    "task": "FOLLOW-UP ON TASK",
+    "task_details": "CAN WE GET AN UPDATE ON THE PENDING TASK?",
+    "date": "2024-10-21",
     "is_complete": false
   },
   {
     "person": "VINCENT",
-    "task": "FINALIZE SPRINT DETAILS WITH VINCE",
-    "task_details": "FOLLOW UP AND FINALIZE ALL DETAILS FOR THE UPCOMING SPRINT ON MONDAY MORNING.",
-    "date": "2024-10-20",
+    "task": "SPRINT PLANNING",
+    "task_details": "WE NEED TO FINALIZE THE DETAILS FOR THE UPCOMING SPRINT.",
+    "date": "2024-10-21",
     "is_complete": false
   }
 ]
