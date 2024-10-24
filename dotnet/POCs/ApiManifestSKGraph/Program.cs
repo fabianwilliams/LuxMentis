@@ -1,15 +1,13 @@
 ﻿// Disable specific warnings
 #pragma warning disable SKEXP0010, SKEXP0050, SKEXP0001, SKEXP0040
 
-using Microsoft.Extensions.DependencyInjection;
+using System.IO;
 using Microsoft.Extensions.Logging;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.Connectors.OpenAI;
 using Microsoft.SemanticKernel.Plugins.OpenApi;
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
@@ -22,13 +20,6 @@ namespace SemanticKernelApp
     {
         private static IConfiguration _configuration;
         private static ILogger _logger;
-
-        // Parameters for testing plugins (email and calendar)
-        static readonly IEnumerable<(string PluginToTest, string FunctionToTest, string[] PluginsToLoad)> Parameters =
-            new[] 
-            { 
-                ("MessagesPlugin", "meListMessages", new[] { "MessagesPlugin" })
-            };
 
         static async Task Main(string[] args)
         {
@@ -47,14 +38,23 @@ namespace SemanticKernelApp
             // Initialize the kernel
             var endpoint = new Uri("http://localhost:11434/v1");
             var modelId = "llama3.1:70b";
-
             var builder = Kernel.CreateBuilder()
                 .AddOpenAIChatCompletion(modelId: modelId, apiKey: null, endpoint: endpoint);
 
             var kernel = builder.Build();
 
-            // Test Graph token acquisition
+            // Load plugins using HttpClient and token
+            await AddApiManifestPluginsAsync(kernel, new[] { "MessagesPlugin" });
+
+            // Perform the test with the loaded plugin
+            await TestMessagesPlugin(kernel);
+        }
+
+        static async Task AddApiManifestPluginsAsync(Kernel kernel, string[] pluginNames)
+        {
+            // Get the Microsoft Graph Access Token
             var token = await GetGraphAccessTokenAsync();
+
             if (string.IsNullOrEmpty(token))
             {
                 _logger.LogError("Failed to acquire Graph token.");
@@ -63,63 +63,33 @@ namespace SemanticKernelApp
 
             _logger.LogInformation("Successfully acquired Graph token: {Token}", token.Substring(0, 20)); // Masked for safety
 
-            // Load plugins (using OpenAPI for MessagesPlugin only)
-            foreach (var (pluginToTest, functionToTest, pluginsToLoad) in Parameters)
-            {
-                // We're not using this anymore but kept for reference
-                // await RunSampleAsync(kernel, pluginToTest, functionToTest, pluginsToLoad);
-            }
-
-            // Perform chat completion using the API manifest plugins
-            await PerformChatCompletion(kernel);
-        }
-
-        static async Task RunSampleAsync(Kernel kernel, string pluginToTest, string functionToTest, string[] pluginsToLoad)
-        {
-            _logger.LogInformation($"Running test for {pluginToTest}.{functionToTest}");
-
-            await AddApiManifestPluginsAsync(kernel, pluginsToLoad);
-
-            var function = kernel.ImportPluginFromFunctions(pluginToTest, functionToTest);
-            if (function == null)
-            {
-                _logger.LogError($"Function {pluginToTest}.{functionToTest} not found.");
-                return;
-            }
-
-            _logger.LogInformation($"Successfully invoked {pluginToTest}.{functionToTest}");
-        }
-
-        static async Task AddApiManifestPluginsAsync(Kernel kernel, string[] pluginNames)
-        {
-            var token = await GetGraphAccessTokenAsync();
-
-            if (string.IsNullOrEmpty(token))
-            {
-                _logger.LogError("Failed to acquire Graph token for plugin authentication.");
-                return;
-            }
-
-            _logger.LogInformation("Loading plugins with Graph API token.");
-
-            var authenticationProvider = new BearerAuthenticationProvider(() => Task.FromResult(token));
+            // Write token to text file for scope verification
+            File.WriteAllText("token.txt", token);
+            _logger.LogInformation("Token written to token.txt for scope verification.");
 
             foreach (var pluginName in pluginNames)
             {
                 try
                 {
                     _logger.LogInformation($"Loading plugin: {pluginName}");
-                    
+
                     if (pluginName == "MessagesPlugin")
                     {
+                        // Create HttpClient with the Bearer token
+                        var httpClient = new HttpClient();
+                        httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+                        // Load the OpenAPI plugin using the HttpClient
                         await kernel.ImportPluginFromOpenApiAsync(
                             pluginName: "MessagesPlugin",
                             filePath: "Plugins/ApiManifestPlugins/MessagesPlugin/apimanifest.json",
                             executionParameters: new OpenApiFunctionExecutionParameters
                             {
-                                EnablePayloadNamespacing = true
+                                HttpClient = httpClient, // Set up the HttpClient
+                                EnablePayloadNamespacing = true // Enables namespacing of parameters to avoid conflicts
                             }
                         );
+
                         _logger.LogInformation($"{pluginName} loaded successfully.");
                     }
                 }
@@ -130,55 +100,56 @@ namespace SemanticKernelApp
             }
         }
 
-        static async Task PerformChatCompletion(Kernel kernel)
+        static async Task TestMessagesPlugin(Kernel kernel)
         {
-            // Create the prompt asking about the latest email
-            string prompt = @"
-            Hey, I need some help.
-            Can you tell me what the latest unread email is?
-            Please summarize the details for me.";
-
-            // Logging the prompt before sending it to the LLM
-            _logger.LogInformation($"Sending the following prompt to LLM:\n{prompt}");
-
-            // Perform the chat completion using the prompt
-            OpenAIPromptExecutionSettings settings = new()
+            try
             {
-                ToolCallBehavior = ToolCallBehavior.AutoInvokeKernelFunctions
-            };
-
-            var functionResult = await kernel.InvokePromptAsync(prompt, new(settings));
-
-            // Log or display the final result from the LLM
-            _logger.LogInformation("LLM's response with the synthesized email:");
-
-            if (functionResult != null)
-            {
-                // Output the result directly since "GetOutputsAsync()" was causing issues
-                var resultText = functionResult.ToString();
-
-                if (!string.IsNullOrEmpty(resultText))
+                // Prepare parameters for the plugin
+                var parameters = new Dictionary<string, string>
                 {
-                    Console.WriteLine("Summary of Latest Email:");
-                    Console.WriteLine(resultText);
+                    { "$top", "5" }, // Limit the number of results
+                    { "$select", "id,receivedDateTime,subject,from,bodyPreview" } // Specify fields to return
+                };
 
-                    // Check if the result contains any plugin-related information
-                    if (resultText.Contains("MessagesPlugin"))
-                    {
-                        _logger.LogInformation("The MessagesPlugin was invoked successfully.");
-                    }
-                    else
-                    {
-                        _logger.LogWarning("MessagesPlugin was not invoked, check plugin loading or function invocation.");
-                    }
+                /*
+                // Invoke the plugin function directly
+                var result = await kernel.ExecuteFunctionAsync(
+                    pluginName: "MessagesPlugin",
+                    functionName: "readEmails",  // Ensure this matches your manifest's operationId
+                    parameters: parameters
+                );
+                */
 
-                    // Additional proof: Log the raw result from LLM
-                    _logger.LogInformation($"Raw LLM response: {resultText}");
+                var token = await GetGraphAccessTokenAsync();
+
+                var httpClient = new HttpClient();
+                httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+                var result = await kernel.ImportPluginFromOpenApiAsync(
+                            pluginName: "MessagesPlugin",
+                            filePath: "Plugins/ApiManifestPlugins/MessagesPlugin/apimanifest.json",
+                            executionParameters: new OpenApiFunctionExecutionParameters
+                            {
+                                HttpClient = httpClient,
+                                EnablePayloadNamespacing = true
+                            }
+                        );
+
+                // Log the result from Microsoft Graph API
+                if (result != null)
+                {
+                    Console.WriteLine($"Result from MessagesPlugin: {result}");
+                    _logger.LogInformation($"Result from MessagesPlugin: {result}");
                 }
                 else
                 {
-                    _logger.LogWarning("The result was null or empty. Check plugin invocation and execution.");
+                    Console.WriteLine("No result from MessagesPlugin.");
+                    _logger.LogWarning("No result from MessagesPlugin.");
                 }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Error in TestMessagesPlugin: {ex.Message}");
             }
         }
 
@@ -186,21 +157,36 @@ namespace SemanticKernelApp
         {
             try
             {
-                _logger.LogInformation("Attempting to acquire Graph token...");
+                _logger.LogInformation("Attempting to acquire a Graph token using device code flow...");
 
                 var clientId = _configuration["AzureAd:ClientId"];
                 var tenantId = _configuration["AzureAd:TenantId"];
-                var clientSecret = _configuration["AzureAd:ClientSecret"];
-                var scopes = new[] { "https://graph.microsoft.com/.default" };
+                var scopes = new[] { "Mail.Read" }; // Adjust scopes if necessary
 
-                var app = ConfidentialClientApplicationBuilder.Create(clientId)
-                    .WithClientSecret(clientSecret)
-                    .WithTenantId(tenantId)
-                    .Build();
+                var app = PublicClientApplicationBuilder.Create(clientId)
+                                .WithTenantId(tenantId)
+                                .Build();
 
-                var result = await app.AcquireTokenForClient(scopes).ExecuteAsync();
+                var result = await app.AcquireTokenWithDeviceCode(scopes, callback =>
+                {
+                    Console.WriteLine(callback.Message); // Display device code login message
+                    _logger.LogInformation("Device code login message: " + callback.Message); // Log the device code message
+                    return Task.FromResult(0);
+                }).ExecuteAsync();
 
-                _logger.LogInformation("Successfully acquired Graph token: {Token}", result.AccessToken.Substring(0, 20)); // Mask token
+                // Log and return the token
+                _logger.LogInformation("Successfully acquired Graph token: {Token}", result.AccessToken.Substring(0, 20));
+
+                // Ensure that token is immediately usable
+                if (!string.IsNullOrEmpty(result.AccessToken))
+                {
+                    _logger.LogInformation("Token is valid and ready for use.");
+                }
+                else
+                {
+                    _logger.LogError("Failed to acquire a valid token.");
+                }
+
                 return result.AccessToken;
             }
             catch (Exception ex)
@@ -208,22 +194,6 @@ namespace SemanticKernelApp
                 _logger.LogError($"Error acquiring Graph token: {ex.Message}");
                 return null;
             }
-        }
-    }
-
-    public class BearerAuthenticationProvider
-    {
-        private readonly Func<Task<string>> _getToken;
-
-        public BearerAuthenticationProvider(Func<Task<string>> getToken)
-        {
-            _getToken = getToken;
-        }
-
-        public async Task AuthenticateRequestAsync(HttpRequestMessage request)
-        {
-            var token = await _getToken();
-            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
         }
     }
 }

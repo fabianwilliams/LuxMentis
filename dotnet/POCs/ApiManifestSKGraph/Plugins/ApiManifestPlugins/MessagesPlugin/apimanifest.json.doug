@@ -1,0 +1,294 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Microsoft Graph API",
+    "version": "v1.0",
+    "description": "API for accessing Microsoft Graph"
+  },
+  "servers": [
+    {
+      "url": "https://graph.microsoft.com"
+    }
+  ],
+  "paths": {
+    "/v1.0/me": {
+      "get": {
+        "operationId": "GetUser",
+        "summary": "Get the user profile information",
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved user profile",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Unexpected error"
+          }
+        }
+      }
+    },
+    "/v1.0/me/messages": {
+      "get": {
+        "summary": "Get user messages with previews of the body",
+        "operationId": "FindMessages",
+        "tags": ["Messages"],
+        "parameters": [
+          {
+            "name": "$top",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "default": 10
+            },
+            "description": "Limits the number of messages returned in a single response."
+          },
+          {
+            "name": "$filter",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filters the messages based on specified conditions. MUST include receivedDateTime gt 1900-01-01 if using $orderby."
+          },
+          {
+            "name": "$orderby",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Specifies the sort order. Every field in `$orderby` MUST be included in `$filter`"
+          },
+          {
+            "name": "$select",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "id,receivedDateTime,from,subject,webLink,bodyPreview"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved messages",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MessageItem"
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Unexpected error"
+          }
+        }
+      }
+    },
+    "/v1.0/me/messages/{id}": {
+      "get": {
+        "summary": "Get the full body of a specific message",
+        "operationId": "GetMessageDetails",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The unique identifier of the message."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved message details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MessageItem"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Unexpected error"
+          }
+        }
+      }
+    },
+    "/v1.0/me/sendMail": {
+      "post": {
+        "summary": "Start a new conversation by sending a message. Verify content with user before sending.",
+        "operationId": "StartNewConvesation",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MessageRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successfully sent the message"
+          },
+          "default": {
+            "description": "Unexpected error"
+          }
+        }
+      }
+    },
+    "/v1.0/me/messages/{id}/reply": {
+      "post": {
+        "summary": "Reply to a message in an ongoing conversation. Verify content with user before sending.",
+        "operationId": "ReplyToMessage",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The unique identifier of the message to reply to."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MessageRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successfully replied to the message"
+          },
+          "default": {
+            "description": "Unexpected error"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "User": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "mail": {
+            "type": "string"
+          }
+        }
+      },
+      "MessageItem": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "receivedDateTime": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "subject": {
+            "type": "string"
+          },
+          "from": {
+            "type": "object",
+            "properties": {
+              "emailAddress": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "address": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "bodyPreview": {
+            "type": "string"
+          },
+          "hasAttachments": {
+            "type": "boolean"
+          },
+          "webLink": {
+            "type": "string"
+          }
+        }
+      },
+      "MessageRequest": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "object",
+            "properties": {
+              "subject": {
+                "type": "string"
+              },
+              "body": {
+                "type": "object",
+                "properties": {
+                  "contentType": {
+                    "type": "string",
+                    "enum": ["Text", "HTML"]
+                  },
+                  "content": {
+                    "type": "string"
+                  }
+                }
+              },
+              "toRecipients": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "emailAddress": {
+                      "type": "object",
+                      "properties": {
+                        "address": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "saveToSentItems": {
+            "type": "string",
+            "enum": ["true", "false"]
+          }
+        }
+      }
+    }
+  }
+}

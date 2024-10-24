@@ -1,0 +1,37 @@
+{
+    "applicationName": "SemanticKernel",
+    "publisher": {
+        "name": "publisher-name",
+        "contactEmail": "publisher-email@example.com"
+    },
+    "apiDependencies": {
+        "microsoft.graph": {
+            "apiDescriptionUrl": "https://raw.githubusercontent.com/microsoftgraph/msgraph-metadata/zengin/overlay/openapi/v1.0/graphexplorer-with-overlay.yaml",
+            "apiDeploymentBaseUrl": "https://graph.microsoft.com/v1.0/",
+            "authorizationRequirements": {
+                "clientIdentifier": "some-uuid-here",
+                "access": [
+                    {
+                        "type": "openid",
+                        "content": {
+                            "claims": {
+                                "scp": {
+                                    "essential": true,
+                                    "values": [
+                                        "Mail.Read"
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                ]
+            },
+            "requests": [
+                {
+                    "method": "Get",
+                    "uriTemplate": "/me/messages"
+                }
+            ]
+        }
+    }
+}
