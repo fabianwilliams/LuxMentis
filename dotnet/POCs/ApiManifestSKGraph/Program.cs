@@ -84,8 +84,11 @@ namespace SemanticKernelApp
             _logger.LogInformation("Successfully acquired Graph token: {Token}", token.Substring(0, 20)); // Masked for safety
 
             // Write token to text file
+            /*
+            // Yeah dont do that 
             File.WriteAllText("token.txt", token);
             _logger.LogInformation("Token written to token.txt for scope verification.");
+            */
 
             _logger.LogInformation("Loading plugins with Graph API token.");
 
@@ -151,16 +154,6 @@ namespace SemanticKernelApp
                 {
                     Console.WriteLine("Summary of Latest Email:");
                     Console.WriteLine(resultText);
-
-                    // Check if the result contains any plugin-related information
-                    if (resultText.Contains("MessagesPlugin"))
-                    {
-                        _logger.LogInformation("The MessagesPlugin was invoked successfully.");
-                    }
-                    else
-                    {
-                        _logger.LogWarning("MessagesPlugin was not invoked, check plugin loading or function invocation.");
-                    }
 
                     // Additional proof: Log the raw result from LLM
                     _logger.LogInformation($"Raw LLM response: {resultText}");
