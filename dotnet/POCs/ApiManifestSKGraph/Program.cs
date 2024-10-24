@@ -1,13 +1,16 @@
 ﻿// Disable specific warnings
 #pragma warning disable SKEXP0010, SKEXP0050, SKEXP0001, SKEXP0040
 
+
 using System.IO;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.Connectors.OpenAI;
 using Microsoft.SemanticKernel.Plugins.OpenApi;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
@@ -20,6 +23,13 @@ namespace SemanticKernelApp
     {
         private static IConfiguration _configuration;
         private static ILogger _logger;
+
+        // Parameters for testing plugins (email only)
+        static readonly IEnumerable<(string PluginToTest, string FunctionToTest, string[] PluginsToLoad)> Parameters =
+            new[]
+            {
+                ("MessagesPlugin", "meListMessages", new[] { "MessagesPlugin" })
+            };
 
         static async Task Main(string[] args)
         {
@@ -36,23 +46,33 @@ namespace SemanticKernelApp
             _logger.LogInformation("Starting Semantic Kernel Program");
 
             // Initialize the kernel
+            /*
             var endpoint = new Uri("http://localhost:11434/v1");
             var modelId = "llama3.1:70b";
+            */
+            var apikey = _configuration["OpenAI:ApiKey"];
+            var modelId = "gpt-4o";
+
+            /*
             var builder = Kernel.CreateBuilder()
                 .AddOpenAIChatCompletion(modelId: modelId, apiKey: null, endpoint: endpoint);
 
             var kernel = builder.Build();
+            */
+           var builder = Kernel.CreateBuilder()
+                .AddOpenAIChatCompletion(modelId: modelId, apiKey: apikey);
 
-            // Load plugins using HttpClient and token
+            var kernel = builder.Build();
+
+            // Load plugins (using OpenAPI for MessagesPlugin only)
             await AddApiManifestPluginsAsync(kernel, new[] { "MessagesPlugin" });
 
-            // Perform the test with the loaded plugin
-            await TestMessagesPlugin(kernel);
+            // Perform chat completion using the API manifest plugins
+            await PerformChatCompletion(kernel);
         }
 
         static async Task AddApiManifestPluginsAsync(Kernel kernel, string[] pluginNames)
         {
-            // Get the Microsoft Graph Access Token
             var token = await GetGraphAccessTokenAsync();
 
             if (string.IsNullOrEmpty(token))
@@ -63,9 +83,11 @@ namespace SemanticKernelApp
 
             _logger.LogInformation("Successfully acquired Graph token: {Token}", token.Substring(0, 20)); // Masked for safety
 
-            // Write token to text file for scope verification
+            // Write token to text file
             File.WriteAllText("token.txt", token);
             _logger.LogInformation("Token written to token.txt for scope verification.");
+
+            _logger.LogInformation("Loading plugins with Graph API token.");
 
             foreach (var pluginName in pluginNames)
             {
@@ -75,21 +97,18 @@ namespace SemanticKernelApp
 
                     if (pluginName == "MessagesPlugin")
                     {
-                        // Create HttpClient with the Bearer token
                         var httpClient = new HttpClient();
                         httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
-                        // Load the OpenAPI plugin using the HttpClient
                         await kernel.ImportPluginFromOpenApiAsync(
                             pluginName: "MessagesPlugin",
                             filePath: "Plugins/ApiManifestPlugins/MessagesPlugin/apimanifest.json",
                             executionParameters: new OpenApiFunctionExecutionParameters
                             {
-                                HttpClient = httpClient, // Set up the HttpClient
-                                EnablePayloadNamespacing = true // Enables namespacing of parameters to avoid conflicts
+                                HttpClient = httpClient,
+                                EnablePayloadNamespacing = true
                             }
                         );
-
                         _logger.LogInformation($"{pluginName} loaded successfully.");
                     }
                 }
@@ -100,56 +119,56 @@ namespace SemanticKernelApp
             }
         }
 
-        static async Task TestMessagesPlugin(Kernel kernel)
+        static async Task PerformChatCompletion(Kernel kernel)
         {
-            try
+            // Create the prompt asking about the latest email
+            string prompt = @"
+            Hey, I need some help.
+            Can you tell me what the latest unread email is?
+            Please summarize the details for me.";
+
+            // Logging the prompt before sending it to the LLM
+            _logger.LogInformation($"Sending the following prompt to LLM:\n{prompt}");
+
+            // Perform the chat completion using the prompt
+            OpenAIPromptExecutionSettings settings = new()
             {
-                // Prepare parameters for the plugin
-                var parameters = new Dictionary<string, string>
+                ToolCallBehavior = ToolCallBehavior.AutoInvokeKernelFunctions,
+                MaxTokens = 4000
+            };
+
+            var functionResult = await kernel.InvokePromptAsync(prompt, new(settings));
+
+            // Log or display the final result from the LLM
+            _logger.LogInformation("LLM's response with the synthesized email:");
+
+            if (functionResult != null)
+            {
+                // Output the result directly since "GetOutputsAsync()" was causing issues
+                var resultText = functionResult.ToString();
+
+                if (!string.IsNullOrEmpty(resultText))
                 {
-                    { "$top", "5" }, // Limit the number of results
-                    { "$select", "id,receivedDateTime,subject,from,bodyPreview" } // Specify fields to return
-                };
+                    Console.WriteLine("Summary of Latest Email:");
+                    Console.WriteLine(resultText);
 
-                /*
-                // Invoke the plugin function directly
-                var result = await kernel.ExecuteFunctionAsync(
-                    pluginName: "MessagesPlugin",
-                    functionName: "readEmails",  // Ensure this matches your manifest's operationId
-                    parameters: parameters
-                );
-                */
+                    // Check if the result contains any plugin-related information
+                    if (resultText.Contains("MessagesPlugin"))
+                    {
+                        _logger.LogInformation("The MessagesPlugin was invoked successfully.");
+                    }
+                    else
+                    {
+                        _logger.LogWarning("MessagesPlugin was not invoked, check plugin loading or function invocation.");
+                    }
 
-                var token = await GetGraphAccessTokenAsync();
-
-                var httpClient = new HttpClient();
-                httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-
-                var result = await kernel.ImportPluginFromOpenApiAsync(
-                            pluginName: "MessagesPlugin",
-                            filePath: "Plugins/ApiManifestPlugins/MessagesPlugin/apimanifest.json",
-                            executionParameters: new OpenApiFunctionExecutionParameters
-                            {
-                                HttpClient = httpClient,
-                                EnablePayloadNamespacing = true
-                            }
-                        );
-
-                // Log the result from Microsoft Graph API
-                if (result != null)
-                {
-                    Console.WriteLine($"Result from MessagesPlugin: {result}");
-                    _logger.LogInformation($"Result from MessagesPlugin: {result}");
+                    // Additional proof: Log the raw result from LLM
+                    _logger.LogInformation($"Raw LLM response: {resultText}");
                 }
                 else
                 {
-                    Console.WriteLine("No result from MessagesPlugin.");
-                    _logger.LogWarning("No result from MessagesPlugin.");
+                    _logger.LogWarning("The result was null or empty. Check plugin invocation and execution.");
                 }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError($"Error in TestMessagesPlugin: {ex.Message}");
             }
         }
 
