@@ -1,0 +1,73 @@
+putting stuff from Program.cs that dont work
+
+
+            // Create context and set variables
+            var context = kernel.CreateNewContext();
+            
+            foreach (var kvp in arguments)
+            {
+                context.Variables.Set(kvp.Key, kvp.Value);
+            }
+
+            // Invoke the function
+            var result = await function.InvokeAsync(context);
+
+            Console.WriteLine("--------------------");
+            Console.WriteLine($"\nResult:\n{result.Result}\n");
+            Console.WriteLine("--------------------");
+        }
+
+        static async Task AddApiManifestPluginsAsync(Kernel kernel, string[] pluginNames)
+        {
+            // Microsoft Graph authentication
+            var token = await GetGraphAccessTokenAsync();
+
+            var authenticationProvider = new BearerAuthenticationProvider(() => Task.FromResult(token));
+
+            // Microsoft Graph API execution parameters
+            var graphExecutionParameters = new OpenApiExecutionParameters
+            {
+                AuthCallback = authenticationProvider.AuthenticateRequestAsync,
+                ServerUrlOverride = new Uri("https://graph.microsoft.com/v1.0")
+            };
+
+            // NASA API execution parameters
+            var nasaExecutionParameters = new OpenApiExecutionParameters
+            {
+                AuthCallback = async (request, cancellationToken) =>
+                {
+                    var uri = request.RequestUri ?? throw new InvalidOperationException("The request URI is null.");
+                    var query = QueryHelpers.ParseQuery(uri.Query);
+
+                    var queryDict = query.ToDictionary(kvp => kvp.Key, kvp => kvp.Value.ToString());
+                    queryDict["api_key"] = "DEMO_KEY";
+
+                    var newUri = QueryHelpers.AddQueryString(uri.GetLeftPart(UriPartial.Path), queryDict);
+
+                    request.RequestUri = new Uri(newUri);
+                }
+            };
+
+            var executionParameters = new Dictionary<string, OpenApiExecutionParameters>
+            {
+                { "microsoft.graph", graphExecutionParameters },
+                { "nasa", nasaExecutionParameters }
+            };
+
+            foreach (var pluginName in pluginNames)
+            {
+                try
+                {
+                    var plugin = await kernel.ImportOpenApiPluginAsync(
+                        pluginName,
+                        $"Plugins/ApiManifestPlugins/{pluginName}/apimanifest.json",
+                        executionParameters).ConfigureAwait(false);
+                    Console.WriteLine($">> {pluginName} plugin is loaded.");
+                }
+                catch (Exception ex)
+                {
+                    kernel.LoggerFactory.CreateLogger("Plugin Creation").LogError(ex, "Plugin creation failed. Message: {0}", ex.Message);
+                    throw new Exception($"Plugin creation failed for {pluginName}", ex);
+                }
+            }
+        }
