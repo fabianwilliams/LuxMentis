@@ -105,7 +105,7 @@ namespace SemanticKernelApp
 
                         await kernel.ImportPluginFromOpenApiAsync(
                             pluginName: "MessagesPlugin",
-                            filePath: "Plugins/ApiManifestPlugins/MessagesPlugin/apimanifest.json",
+                            filePath: "Plugins/OpenAPISpecs/MessagesPlugin/openapispec.json",
                             executionParameters: new OpenApiFunctionExecutionParameters
                             {
                                 HttpClient = httpClient,
@@ -127,8 +127,10 @@ namespace SemanticKernelApp
             // Create the prompt asking about the latest email
             string prompt = @"
             Hey, I need some help.
-            Can you tell me what the latest unread email is?
-            Please summarize the details for me.";
+            Can you tell me what the last couple unread email is?
+            Please summarize the details for me as concise as possible
+            Whats important is who its from when it was sent subject and
+            brief description of the ask";
 
             // Logging the prompt before sending it to the LLM
             _logger.LogInformation($"Sending the following prompt to LLM:\n{prompt}");
@@ -137,7 +139,7 @@ namespace SemanticKernelApp
             OpenAIPromptExecutionSettings settings = new()
             {
                 ToolCallBehavior = ToolCallBehavior.AutoInvokeKernelFunctions,
-                MaxTokens = 4000
+                MaxTokens = 5000
             };
 
             var functionResult = await kernel.InvokePromptAsync(prompt, new(settings));
@@ -164,32 +166,41 @@ namespace SemanticKernelApp
                 }
             }
         }
-
         static async Task<string> GetGraphAccessTokenAsync()
         {
             try
             {
-                _logger.LogInformation("Attempting to acquire a Graph token using device code flow...");
+                _logger.LogInformation("Attempting to acquire a new Graph token using device code flow...");
 
                 var clientId = _configuration["AzureAd:ClientId"];
                 var tenantId = _configuration["AzureAd:TenantId"];
                 var scopes = new[] { "Mail.Read" }; // Adjust scopes if necessary
 
+                // Create the public client application with a token cache that we will clear
                 var app = PublicClientApplicationBuilder.Create(clientId)
-                                .WithTenantId(tenantId)
-                                .Build();
+                                    .WithTenantId(tenantId)
+                                    .Build();
 
+                // Clear the token cache to ensure a fresh token request
+                var accounts = await app.GetAccountsAsync();
+                foreach (var account in accounts)
+                {
+                    _logger.LogInformation($"Clearing cached token for account: {account.Username}");
+                    await app.RemoveAsync(account); // Clear cache for this account
+                }
+
+                // Acquire token with device code flow
                 var result = await app.AcquireTokenWithDeviceCode(scopes, callback =>
                 {
-                    Console.WriteLine(callback.Message); // Display device code login message
-                    _logger.LogInformation("Device code login message: " + callback.Message); // Log the device code message
+                    // Display the device code message for login
+                    Console.WriteLine(callback.Message);
+                    _logger.LogInformation("Device code login message: " + callback.Message);
                     return Task.FromResult(0);
                 }).ExecuteAsync();
 
                 // Log and return the token
-                _logger.LogInformation("Successfully acquired Graph token: {Token}", result.AccessToken.Substring(0, 20));
+                _logger.LogInformation("Successfully acquired a new Graph token: {Token}", result.AccessToken.Substring(0, 20));
 
-                // Ensure that token is immediately usable
                 if (!string.IsNullOrEmpty(result.AccessToken))
                 {
                     _logger.LogInformation("Token is valid and ready for use.");
