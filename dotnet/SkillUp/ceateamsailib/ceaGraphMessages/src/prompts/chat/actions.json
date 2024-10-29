@@ -1,0 +1,26 @@
+[
+  {
+    "name": "readEmails",
+    "description": "Read emails from the current user's inbox",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "query": {
+          "type": "object",
+          "properties": {
+            "top": {
+              "type": "integer",
+              "description": "The maximum number of messages to retrieve."
+            },
+            "select": {
+              "type": "string",
+              "description": "The specific fields to return in the response."
+            }
+          },
+          "required": []
+        }
+      },
+      "required": []
+    }
+  }
+]

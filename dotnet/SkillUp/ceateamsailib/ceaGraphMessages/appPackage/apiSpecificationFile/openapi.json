@@ -1,0 +1,118 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "MessagesPlugin API",
+    "version": "1.0"
+  },
+  "servers": [
+    {
+      "url": "https://graph.microsoft.com/v1.0"
+    }
+  ],
+  "paths": {
+    "/me/messages": {
+      "get": {
+        "operationId": "readEmails",
+        "summary": "Read emails from the current user's inbox",
+        "parameters": [
+          {
+            "name": "top",
+            "in": "query",
+            "description": "The maximum number of messages to retrieve.",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "select",
+            "in": "query",
+            "description": "The specific fields to return in the response.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MessageItem"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2": []
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "MessageItem": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "receivedDateTime": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "subject": {
+            "type": "string"
+          },
+          "from": {
+            "type": "object",
+            "properties": {
+              "emailAddress": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "address": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "bodyPreview": {
+            "type": "string"
+          },
+          "hasAttachments": {
+            "type": "boolean"
+          },
+          "webLink": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "OAuth2": {
+        "type": "oauth2",
+        "flows": {
+          "authorizationCode": {
+            "authorizationUrl": "https://login.microsoftonline.com/common/oauth2/v2.0/authorize",
+            "tokenUrl": "https://login.microsoftonline.com/common/oauth2/v2.0/token",
+            "scopes": {
+              "Mail.Read": "Read mail in user's mailbox"
+            }
+          }
+        }
+      }
+    }
+  }
+}
