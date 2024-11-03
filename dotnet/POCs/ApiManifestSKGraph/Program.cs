@@ -92,28 +92,37 @@ namespace SemanticKernelApp
 
             _logger.LogInformation("Loading plugins with Graph API token.");
 
-            foreach (var pluginName in pluginNames)
+            // Adjusted path to the plugins directory
+            string pluginsDirectory = Path.Combine(Directory.GetCurrentDirectory(), "Plugins", "OpenAPISpecs");
+
+
+            // Get all .json and .yml files under the plugins directory
+            var pluginFiles = Directory.GetFiles(pluginsDirectory, "*.*", SearchOption.AllDirectories)
+                                    .Where(file => file.EndsWith(".json"))
+                                    .ToList();
+
+            foreach (var filePath in pluginFiles)
             {
+                var pluginName = Path.GetFileNameWithoutExtension(filePath);
+
                 try
                 {
                     _logger.LogInformation($"Loading plugin: {pluginName}");
 
-                    if (pluginName == "MessagesPlugin")
-                    {
-                        var httpClient = new HttpClient();
-                        httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                    var httpClient = new HttpClient();
+                    httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
-                        await kernel.ImportPluginFromOpenApiAsync(
-                            pluginName: "MessagesPlugin",
-                            filePath: "Plugins/OpenAPISpecs/MessagesPlugin/openapispec.json",
-                            executionParameters: new OpenApiFunctionExecutionParameters
-                            {
-                                HttpClient = httpClient,
-                                EnablePayloadNamespacing = true
-                            }
-                        );
-                        _logger.LogInformation($"{pluginName} loaded successfully.");
-                    }
+                    await kernel.ImportPluginFromOpenApiAsync(
+                        pluginName: pluginName,
+                        filePath: filePath,
+                        executionParameters: new OpenApiFunctionExecutionParameters
+                        {
+                            HttpClient = httpClient,
+                            EnablePayloadNamespacing = true
+                        }
+                    );
+
+                    _logger.LogInformation($"{pluginName} loaded successfully.");
                 }
                 catch (Exception ex)
                 {
@@ -124,13 +133,53 @@ namespace SemanticKernelApp
 
         static async Task PerformChatCompletion(Kernel kernel)
         {
+            /*
             // Create the prompt asking about the latest email
+            string prompt = @"
+            Hey, I need some help.
+            Send an email to fabian@adotob.com letting him know
+            to get the proposal for Vincent ready in the next 2 days? 
+            with a Subject of Lets Meet Soon. Author and Send the email";
+            */
+
+            /*
+            // Create the prompt asking about Contacts
+            string prompt = @"
+            Hey, I need some help.
+            I need to send an email to someone and their name is Adis
+            Can you give me their details please?";
+            */
+            
+
+            /*
+            // Create the prompt asking about Calendars
+            //wont work due to filters and other items in the OpenAPI Spec
+            string prompt = @"
+            Hey, I need some help.
+            How many meetings do i have tomorrow?";
+            */
+
+            /*
+            // Create the prompt asking about the latest email
+            //THIS WORKS and is tested
             string prompt = @"
             Hey, I need some help.
             Can you tell me what the last couple unread email is?
             Please summarize the details for me as concise as possible
             Whats important is who its from when it was sent subject and
             brief description of the ask";
+            */
+
+            
+            //Create a prompt that sends an email
+            string prompt = @"
+            Compose and send an email to keysersoze9416@gmail.com with the 
+            subject ‘Project Milestone Hit’ and body ‘Hi Keyser, We had a few successful test. 
+            We’re on track for the deadline. Let me know if you have any questions. 
+            Thanks!’ 
+            Confirm if the email was sent successfully.
+            ";
+            
 
             // Logging the prompt before sending it to the LLM
             _logger.LogInformation($"Sending the following prompt to LLM:\n{prompt}");
@@ -139,7 +188,7 @@ namespace SemanticKernelApp
             OpenAIPromptExecutionSettings settings = new()
             {
                 ToolCallBehavior = ToolCallBehavior.AutoInvokeKernelFunctions,
-                MaxTokens = 5000
+                MaxTokens = 2000
             };
 
             var functionResult = await kernel.InvokePromptAsync(prompt, new(settings));

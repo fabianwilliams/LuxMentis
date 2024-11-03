@@ -1,118 +1,169 @@
 {
-    "openapi": "3.0.0",
-    "info": {
-      "title": "MessagesPlugin API",
-      "version": "1.0"
-    },
-    "servers": [
-      {
-        "url": "https://graph.microsoft.com/v1.0"
-      }
-    ],
-    "paths": {
-      "/me/messages": {
-        "get": {
-          "operationId": "readEmails",
-          "summary": "Read emails from the current user's inbox",
-          "parameters": [
-            {
-              "name": "top",
-              "in": "query",
-              "description": "The maximum number of messages to retrieve.",
-              "required": false,
-              "schema": {
-                "type": "integer"
-              }
-            },
-            {
-              "name": "select",
-              "in": "query",
-              "description": "The specific fields to return in the response.",
-              "required": false,
-              "schema": {
-                "type": "string"
-              }
+  "openapi": "3.0.1",
+  "info": {
+    "title": "OData Service for namespace microsoft.graph",
+    "description": "This OData service is located at https://graph.microsoft.com/v1.0",
+    "version": "v1.0",
+    "contact": {
+      "email": "publisher-email@example.com"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://graph.microsoft.com/v1.0"
+    }
+  ],
+  "paths": {
+    "/me/messages": {
+      "get": {
+        "tags": ["me.message"],
+        "summary": "Get open extension",
+        "description": "Retrieve the user's messages. Supports various query parameters for filtering and selecting specific fields.",
+        "operationId": "me_ListMessages",
+        "parameters": [
+          {
+            "name": "$top",
+            "in": "query",
+            "description": "Show only the first n items",
+            "schema": { "type": "integer", "minimum": 0 }
+          },
+          {
+            "name": "$skip",
+            "in": "query",
+            "description": "Skip the first n items",
+            "schema": { "type": "integer", "minimum": 0 }
+          },
+          {
+            "name": "$filter",
+            "in": "query",
+            "description": "Filter items by property values",
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "$select",
+            "in": "query",
+            "description": "Select properties to be returned",
+            "schema": {
+              "type": "array",
+              "items": { "type": "string" },
+              "uniqueItems": true
             }
-          ],
-          "responses": {
-            "200": {
-              "description": "Successful response",
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "type": "array",
-                    "items": {
-                      "$ref": "#/components/schemas/MessageItem"
-                    }
-                  }
-                }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A collection of messages",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/microsoft.graph.messageCollectionResponse" }
               }
             }
           },
-          "security": [
-            {
-              "OAuth2": []
-            }
-          ]
-        }
-      }
-    },
-    "components": {
-      "schemas": {
-        "MessageItem": {
-          "type": "object",
-          "properties": {
-            "id": {
-              "type": "string"
-            },
-            "receivedDateTime": {
-              "type": "string",
-              "format": "date-time"
-            },
-            "subject": {
-              "type": "string"
-            },
-            "from": {
-              "type": "object",
-              "properties": {
-                "emailAddress": {
-                  "type": "object",
-                  "properties": {
-                    "name": {
-                      "type": "string"
-                    },
-                    "address": {
-                      "type": "string"
-                    }
-                  }
-                }
+          "default": {
+            "description": "Error response",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/microsoft.graph.ODataErrors.ODataError" }
               }
-            },
-            "bodyPreview": {
-              "type": "string"
-            },
-            "hasAttachments": {
-              "type": "boolean"
-            },
-            "webLink": {
-              "type": "string"
             }
           }
         }
       },
-      "securitySchemes": {
-        "OAuth2": {
-          "type": "oauth2",
-          "flows": {
-            "authorizationCode": {
-              "authorizationUrl": "https://login.microsoftonline.com/common/oauth2/v2.0/authorize",
-              "tokenUrl": "https://login.microsoftonline.com/common/oauth2/v2.0/token",
-              "scopes": {
-                "Mail.Read": "Read mail in user's mailbox"
+      "post": {
+        "tags": ["me.message"],
+        "summary": "Send a message",
+        "description": "Creates and sends an email message.",
+        "operationId": "me_CreateMessages",
+        "requestBody": {
+          "description": "The email message details",
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/microsoft.graph.message" }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Message created and sent",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/microsoft.graph.message" }
+              }
+            }
+          },
+          "default": {
+            "description": "Error response",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/microsoft.graph.ODataErrors.ODataError" }
               }
             }
           }
         }
       }
     }
+  },
+  "components": {
+    "schemas": {
+      "microsoft.graph.messageCollectionResponse": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/microsoft.graph.message" }
+          }
+        }
+      },
+      "microsoft.graph.message": {
+        "type": "object",
+        "properties": {
+          "subject": { "type": "string" },
+          "body": {
+            "type": "object",
+            "properties": {
+              "contentType": { "type": "string", "enum": ["text", "html"] },
+              "content": { "type": "string" }
+            }
+          },
+          "toRecipients": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/microsoft.graph.recipient" }
+          },
+          "ccRecipients": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/microsoft.graph.recipient" }
+          },
+          "bccRecipients": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/microsoft.graph.recipient" }
+          }
+        }
+      },
+      "microsoft.graph.recipient": {
+        "type": "object",
+        "properties": {
+          "emailAddress": {
+            "type": "object",
+            "properties": {
+              "address": { "type": "string" },
+              "name": { "type": "string" }
+            }
+          }
+        }
+      },
+      "microsoft.graph.ODataErrors.ODataError": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "object",
+            "properties": {
+              "code": { "type": "string" },
+              "message": { "type": "string" }
+            }
+          }
+        }
+      }
+    }
   }
+}
