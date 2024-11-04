@@ -174,8 +174,8 @@ namespace SemanticKernelApp
             //Create a prompt that sends an email
             string prompt = @"
             Compose and send an email to keysersoze9416@gmail.com with the 
-            subject ‘Project Milestone Hit’ and body ‘Hi Keyser, We had a few successful test. 
-            We’re on track for the deadline. Let me know if you have any questions. 
+            subject ‘Project Milestone Hit’ and body ‘Hi Keyser, We are using a new OpenAPI Spec to test. 
+            We’re on our way to actually sending email not just drafts. Let me know if you have any questions. 
             Thanks!’ 
             Confirm if the email was sent successfully.
             ";
