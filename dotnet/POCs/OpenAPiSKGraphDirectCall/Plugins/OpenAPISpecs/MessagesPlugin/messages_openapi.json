@@ -1,0 +1,212 @@
+{
+    "openapi": "3.0.1",
+    "info": {
+      "title": "OData Service for namespace microsoft.graph",
+      "description": "This OData service is located at https://graph.microsoft.com/v1.0",
+      "version": "v1.0",
+      "contact": {
+        "email": "fabian@adotob.com"
+      }
+    },
+    "servers": [
+      {
+        "url": "https://graph.microsoft.com/v1.0"
+      }
+    ],
+    "paths": {
+      "/me/messages": {
+        "get": {
+          "tags": ["me.message"],
+          "summary": "Get open extension",
+          "description": "Retrieve the user's messages. Supports various query parameters for filtering and selecting specific fields.",
+          "operationId": "me_ListMessages",
+          "parameters": [
+            {
+              "name": "$top",
+              "in": "query",
+              "description": "Show only the first n items",
+              "schema": { "type": "integer", "minimum": 0 }
+            },
+            {
+              "name": "$skip",
+              "in": "query",
+              "description": "Skip the first n items",
+              "schema": { "type": "integer", "minimum": 0 }
+            },
+            {
+              "name": "$filter",
+              "in": "query",
+              "description": "Filter items by property values",
+              "schema": { "type": "string" }
+            },
+            {
+              "name": "$select",
+              "in": "query",
+              "description": "Select properties to be returned",
+              "schema": {
+                "type": "array",
+                "items": { "type": "string" },
+                "uniqueItems": true
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "A collection of messages",
+              "content": {
+                "application/json": {
+                  "schema": { "$ref": "#/components/schemas/microsoft.graph.messageCollectionResponse" }
+                }
+              }
+            },
+            "default": {
+              "description": "Error response",
+              "content": {
+                "application/json": {
+                  "schema": { "$ref": "#/components/schemas/microsoft.graph.ODataErrors.ODataError" }
+                }
+              }
+            }
+          }
+        },
+        "post": {
+          "tags": ["me.message"],
+          "summary": "Create a draft message",
+          "description": "Creates an email message in the user's drafts folder.",
+          "operationId": "me_CreateMessages",
+          "requestBody": {
+            "description": "The email message details",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/microsoft.graph.message" }
+              }
+            },
+            "required": true
+          },
+          "responses": {
+            "201": {
+              "description": "Message created in drafts",
+              "content": {
+                "application/json": {
+                  "schema": { "$ref": "#/components/schemas/microsoft.graph.message" }
+                }
+              }
+            },
+            "default": {
+              "description": "Error response",
+              "content": {
+                "application/json": {
+                  "schema": { "$ref": "#/components/schemas/microsoft.graph.ODataErrors.ODataError" }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/me/sendMail": {
+        "post": {
+          "tags": ["me.message"],
+          "summary": "Send an email message",
+          "description": "Sends an email message directly to the specified recipients.",
+          "operationId": "me_SendMail",
+          "requestBody": {
+            "description": "The email message details for sending",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "$ref": "#/components/schemas/microsoft.graph.message"
+                    },
+                    "saveToSentItems": {
+                      "type": "boolean",
+                      "description": "Specifies whether to save the mail to sent items. Defaults to true.",
+                      "default": true
+                    }
+                  },
+                  "required": ["message"]
+                }
+              }
+            },
+            "required": true
+          },
+          "responses": {
+            "202": {
+              "description": "Message sent successfully"
+            },
+            "default": {
+              "description": "Error response",
+              "content": {
+                "application/json": {
+                  "schema": { "$ref": "#/components/schemas/microsoft.graph.ODataErrors.ODataError" }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "components": {
+      "schemas": {
+        "microsoft.graph.messageCollectionResponse": {
+          "type": "object",
+          "properties": {
+            "value": {
+              "type": "array",
+              "items": { "$ref": "#/components/schemas/microsoft.graph.message" }
+            }
+          }
+        },
+        "microsoft.graph.message": {
+          "type": "object",
+          "properties": {
+            "subject": { "type": "string" },
+            "body": {
+              "type": "object",
+              "properties": {
+                "contentType": { "type": "string", "enum": ["text", "html"] },
+                "content": { "type": "string" }
+              }
+            },
+            "toRecipients": {
+              "type": "array",
+              "items": { "$ref": "#/components/schemas/microsoft.graph.recipient" }
+            },
+            "ccRecipients": {
+              "type": "array",
+              "items": { "$ref": "#/components/schemas/microsoft.graph.recipient" }
+            },
+            "bccRecipients": {
+              "type": "array",
+              "items": { "$ref": "#/components/schemas/microsoft.graph.recipient" }
+            }
+          }
+        },
+        "microsoft.graph.recipient": {
+          "type": "object",
+          "properties": {
+            "emailAddress": {
+              "type": "object",
+              "properties": {
+                "address": { "type": "string" },
+                "name": { "type": "string" }
+              }
+            }
+          }
+        },
+        "microsoft.graph.ODataErrors.ODataError": {
+          "type": "object",
+          "properties": {
+            "error": {
+              "type": "object",
+              "properties": {
+                "code": { "type": "string" },
+                "message": { "type": "string" }
+              }
+            }
+          }
+        }
+      }
+    }
+  }

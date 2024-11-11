@@ -1,0 +1,149 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "OData Service for namespace microsoft.graph - Subset",
+    "description": "This OData service is located at https://graph.microsoft.com/v1.0",
+    "version": "v1.0"
+  },
+  "servers": [
+    {
+      "url": "https://graph.microsoft.com/v1.0"
+    }
+  ],
+  "paths": {
+    "/me/calendar/events": {
+      "get": {
+        "tags": [
+          "me.calendar"
+        ],
+        "summary": "List events",
+        "description": "Retrieve a list of events in a calendar. The calendar can be one for a user, or the default calendar of a Microsoft 365 group. The list of events contains single instance meetings and series masters.",
+        "operationId": "me_calendar_ListEvents",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/top"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/microsoft.graph.eventCollectionResponse"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "responses": {
+      "microsoft.graph.eventCollectionResponse": {
+        "description": "Retrieved collection",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object"
+            }
+          }
+        }
+      }
+    },
+    "parameters": {
+      "top": {
+        "name": "$top",
+        "in": "query",
+        "description": "Show only the first n items",
+        "style": "form",
+        "explode": false,
+        "schema": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "example": 50
+      },
+      "skip": {
+        "name": "$skip",
+        "in": "query",
+        "description": "Skip the first n items",
+        "style": "form",
+        "explode": false,
+        "schema": {
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "search": {
+        "name": "$search",
+        "in": "query",
+        "description": "Search items by search phrases",
+        "style": "form",
+        "explode": false,
+        "schema": {
+          "type": "string"
+        }
+      },
+      "filter": {
+        "name": "$filter",
+        "in": "query",
+        "description": "Filter items by property values",
+        "style": "form",
+        "explode": false,
+        "schema": {
+          "type": "string"
+        }
+      },
+      "count": {
+        "name": "$count",
+        "in": "query",
+        "description": "Include count of items",
+        "style": "form",
+        "explode": false,
+        "schema": {
+          "type": "boolean"
+        }
+      }
+    },
+    "schemas": {
+      "microsoft.graph.event": {
+        "title": "Event",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique identifier of the event."
+          },
+          "subject": {
+            "type": "string",
+            "description": "The subject of the event."
+          },
+          "start": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The start date and time of the event."
+          },
+          "end": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The end date and time of the event."
+          }
+        }
+      },
+      "microsoft.graph.ODataErrors.ODataError": {
+        "required": [
+          "error"
+        ],
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

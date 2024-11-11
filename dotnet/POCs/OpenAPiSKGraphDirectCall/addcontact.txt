@@ -1,0 +1,40 @@
+{
+
+    "displayName": "Keyser Soze",
+    "givenName": "Keyser",
+    "initials": "KS",
+    "middleName": "Spacey",
+    "nickName": "VirgilKent",
+    "surname": "Soze",
+    "title": "Planner",
+    "yomiGivenName": null,
+    "yomiSurname": null,
+    "yomiCompanyName": "",
+    "generation": null,
+    "imAddresses": [],
+    "jobTitle": "Short Con Artis",
+    "companyName": null,
+    "department": "",
+    "officeLocation": "",
+    "profession": "Grifter",
+    "businessHomePage": "",
+    "assistantName": "",
+    "manager": "",
+    "homePhones": [],
+    "mobilePhone": "",
+    "businessPhones": [
+        "+1 210 999 8888"
+    ],
+    "spouseName": "",
+    "personalNotes": "",
+    "children": [],
+    "emailAddresses": [
+        {
+            "name": "Keyser Soze",
+            "address": "keysersoze9416@gmail.com"
+        }
+    ],
+    "homeAddress": {},
+    "businessAddress": {},
+    "otherAddress": {}
+}

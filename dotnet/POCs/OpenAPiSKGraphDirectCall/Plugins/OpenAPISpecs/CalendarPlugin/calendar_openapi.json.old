@@ -1,0 +1,288 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "OData Service for namespace microsoft.graph - Subset",
+    "description": "This OData service is located at https://graph.microsoft.com/v1.0",
+    "version": "v1.0"
+  },
+  "servers": [
+    {
+      "url": "https://graph.microsoft.com/v1.0"
+    }
+  ],
+  "paths": {
+    "/me/calendar/events": {
+      "get": {
+        "tags": [
+          "me.calendar"
+        ],
+        "summary": "List events",
+        "description": "Retrieve a list of events in a calendar. The calendar can be one for a user, or the default calendar of a Microsoft 365 group. The list of events contains single instance meetings and series masters. To get expanded event instances, you can get the calendar view, or\\nget the instances of an event.",
+        "externalDocs": {
+          "description": "Find more info here",
+          "url": "https://learn.microsoft.com/graph/api/calendar-list-events?view=graph-rest-1.0"
+        },
+        "operationId": "me_calendar_ListEvents",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/top"
+          },
+          {
+            "$ref": "#/components/parameters/skip"
+          },
+          {
+            "$ref": "#/components/parameters/search"
+          },
+          {
+            "$ref": "#/components/parameters/filter"
+          },
+          {
+            "$ref": "#/components/parameters/count"
+          },
+          {
+            "name": "$orderby",
+            "in": "query",
+            "description": "Order items by property values",
+            "style": "form",
+            "explode": false,
+            "schema": {
+              "uniqueItems": true,
+              "type": "array",
+              "items": {
+                "enum": [
+                  "id",
+                  "id desc",
+                  "categories",
+                  "categories desc",
+                  "changeKey",
+                  "changeKey desc",
+                  "createdDateTime",
+                  "createdDateTime desc",
+                  "lastModifiedDateTime",
+                  "lastModifiedDateTime desc",
+                  "allowNewTimeProposals",
+                  "allowNewTimeProposals desc",
+                  "attendees",
+                  "attendees desc",
+                  "body",
+                  "body desc",
+                  "bodyPreview",
+                  "bodyPreview desc",
+                  "end",
+                  "end desc",
+                  "hasAttachments",
+                  "hasAttachments desc",
+                  "hideAttendees",
+                  "hideAttendees desc",
+                  "iCalUId",
+                  "iCalUId desc",
+                  "importance",
+                  "importance desc",
+                  "isAllDay",
+                  "isAllDay desc",
+                  "isCancelled",
+                  "isCancelled desc",
+                  "isDraft",
+                  "isDraft desc",
+                  "isOnlineMeeting",
+                  "isOnlineMeeting desc",
+                  "isOrganizer",
+                  "isOrganizer desc",
+                  "isReminderOn",
+                  "isReminderOn desc",
+                  "location",
+                  "location desc",
+                  "locations",
+                  "locations desc",
+                  "onlineMeeting",
+                  "onlineMeeting desc",
+                  "onlineMeetingProvider",
+                  "onlineMeetingProvider desc",
+                  "onlineMeetingUrl",
+                  "onlineMeetingUrl desc",
+                  "organizer",
+                  "organizer desc",
+                  "originalEndTimeZone",
+                  "originalEndTimeZone desc",
+                  "originalStart",
+                  "originalStart desc",
+                  "originalStartTimeZone",
+                  "originalStartTimeZone desc",
+                  "recurrence",
+                  "recurrence desc",
+                  "reminderMinutesBeforeStart",
+                  "reminderMinutesBeforeStart desc",
+                  "responseRequested",
+                  "responseRequested desc",
+                  "responseStatus",
+                  "responseStatus desc",
+                  "sensitivity",
+                  "sensitivity desc",
+                  "seriesMasterId",
+                  "seriesMasterId desc",
+                  "showAs",
+                  "showAs desc",
+                  "start",
+                  "start desc",
+                  "subject",
+                  "subject desc",
+                  "transactionId",
+                  "transactionId desc",
+                  "type",
+                  "type desc",
+                  "webLink",
+                  "webLink desc"
+                ],
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "$select",
+            "in": "query",
+            "description": "Select properties to be returned",
+            "style": "form",
+            "explode": false,
+            "schema": {
+              "uniqueItems": true,
+              "type": "array",
+              "items": {
+                "enum": [
+                  "id",
+                  "categories",
+                  "changeKey",
+                  "createdDateTime",
+                  "lastModifiedDateTime",
+                  "allowNewTimeProposals",
+                  "attendees",
+                  "body",
+                  "bodyPreview",
+                  "end",
+                  "hasAttachments",
+                  "hideAttendees",
+                  "iCalUId",
+                  "importance",
+                  "isAllDay",
+                  "isCancelled",
+                  "isDraft",
+                  "isOnlineMeeting",
+                  "isOrganizer",
+                  "isReminderOn",
+                  "location",
+                  "locations",
+                  "onlineMeeting",
+                  "onlineMeetingProvider",
+                  "onlineMeetingUrl",
+                  "organizer",
+                  "originalEndTimeZone",
+                  "originalStart",
+                  "originalStartTimeZone",
+                  "recurrence",
+                  "reminderMinutesBeforeStart",
+                  "responseRequested",
+                  "responseStatus",
+                  "sensitivity",
+                  "seriesMasterId",
+                  "showAs",
+                  "start",
+                  "subject",
+                  "transactionId",
+                  "type",
+                  "webLink",
+                  "attachments",
+                  "calendar",
+                  "extensions",
+                  "instances",
+                  "multiValueExtendedProperties",
+                  "singleValueExtendedProperties"
+                ],
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "$expand",
+            "in": "query",
+            "description": "Expand related entities",
+            "style": "form",
+            "explode": false,
+            "schema": {
+              "uniqueItems": true,
+              "type": "array",
+              "items": {
+                "enum": [
+                  "*",
+                  "attachments",
+                  "calendar",
+                  "extensions",
+                  "instances",
+                  "multiValueExtendedProperties",
+                  "singleValueExtendedProperties"
+                ],
+                "type": "string"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/microsoft.graph.eventCollectionResponse"
+          },
+          "default": {
+            "$ref": "#/components/responses/error"
+          }
+        },
+        "x-ms-pageable": {
+          "nextLinkName": "@odata.nextLink",
+          "operationName": "listMore",
+          "itemName": "value"
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "microsoft.graph.eventCollectionResponse": {
+        "title": "Collection of event",
+        "type": "object",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseCollectionPaginationCountResponse"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "value": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/microsoft.graph.event"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "microsoft.graph.ODataErrors.ODataError": {
+        "required": [
+          "error"
+        ],
+        "type": "object",
+        "properties": {
+          "error": {
+            "$ref": "#/components/schemas/microsoft.graph.ODataErrors.MainError"
+          }
+        }
+      },
+      "BaseCollectionPaginationCountResponse": {
+        "title": "Base collection pagination and count responses",
+        "type": "object",
+        "properties": {
+          "@odata.nextLink": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      }
+    }
+  }
+}

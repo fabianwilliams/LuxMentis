@@ -1,5 +1,4 @@
-﻿// Disable specific warnings
-#pragma warning disable SKEXP0010, SKEXP0050, SKEXP0001, SKEXP0040
+﻿#pragma warning disable SKEXP0010, SKEXP0050, SKEXP0001, SKEXP0040
 
 
 using System.IO;
@@ -17,9 +16,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Identity.Client;
 
-namespace SemanticKernelApp
-{
-    class Program
+class Program
     {
         private static IConfiguration _configuration;
         private static ILogger _logger;
@@ -133,39 +130,6 @@ namespace SemanticKernelApp
 
         static async Task PerformChatCompletion(Kernel kernel)
         {
-            /*
-            // Create the prompt asking about the latest email
-            string prompt = @"
-            Hey, I need some help.
-            Send an email to fabian@adotob.com letting him know
-            to get the proposal for Vincent ready in the next 2 days? 
-            with a Subject of Lets Meet Soon. Author and Send the email";
-            */
-
-            /*
-            // Create the prompt asking about Contacts
-            string prompt = @"
-            Hey, I need some help.
-            I need to send an email to someone and their name is Adis
-            Can you give me their details please?";
-            */
-            
-
-            /*
-            // Create the prompt asking about Calendars
-            //wont work due to filters and other items in the OpenAPI Spec
-            string prompt = @"
-            Hey, I need some help.
-            How many meetings do i have tomorrow?";
-            */
-
-
-            //Check to see if multiple can be called
-            string prompt = @"
-            Hey, I need some help.
-            I had a meeting with an Fabs can you give his information please
-            I forgot it?";
-
 
             /*
             // Create the prompt asking about the latest email
@@ -179,15 +143,38 @@ namespace SemanticKernelApp
             */
 
             /*
-            //Create a prompt that sends an email
+            //Check to see if multiple can be called starting with contacts
             string prompt = @"
-            Compose and send an email to keysersoze9416@gmail.com with the 
-            subject ‘Project Milestone Hit’ and body ‘Hi Keyser, We are using a new OpenAPI Spec to test. 
-            We’re on our way to actually sending email not just drafts. Let me know if you have any questions. 
+            Hey, I need some help.
+            I saw Fabs today thought I met him before
+            can you give his information please
+            and remind me do I have any meetings with him or emails from fabsgwill@gmail.com
+            I forgot";
+            */
+
+            /*
+            //Create a prompt that sends an email
+            //This works
+            string prompt = @"
+            I saw Fabs today and got an email from fabsgwill@gmail.com
+            Check for that email and look at my calendar and other emails
+            and create a response on my behalf addressing any and all items in there
+            keep it short, to the points only and send it now! 
             Thanks!’ 
             Confirm if the email was sent successfully.
             ";
             */
+
+            //Create a prompt that sends an email based on whats in inbox and contacts list
+            //This works
+            string prompt = @"
+            Do i have anyone in my Contacts name Keyser
+            If so then look in my email inbox to see if I have any email from that email address
+            Create a response to any email from that email address using the content from that email
+            and create a response on my behalf addressing any and all items in there
+            keep it short, to the points only and send it now! 
+            ";
+            
 
             // Logging the prompt before sending it to the LLM
             _logger.LogInformation($"Sending the following prompt to LLM:\n{prompt}");
@@ -196,7 +183,7 @@ namespace SemanticKernelApp
             OpenAIPromptExecutionSettings settings = new()
             {
                 ToolCallBehavior = ToolCallBehavior.AutoInvokeKernelFunctions,
-                MaxTokens = 2000
+                MaxTokens = 300
             };
 
             var functionResult = await kernel.InvokePromptAsync(prompt, new(settings));
@@ -276,4 +263,3 @@ namespace SemanticKernelApp
             }
         }
     }
-}
