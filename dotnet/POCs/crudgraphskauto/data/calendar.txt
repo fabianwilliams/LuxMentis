@@ -40,5 +40,12 @@
     "event_details": "WE NEED TO FINALIZE THE DETAILS FOR THE UPCOMING SPRINT.",
     "date": "2024-10-21",
     "time_blocked": "08:00 AM - 09:00 AM"
+  },
+  {
+    "person": "VINCENT",
+    "event_title": "ADDRESS SPRINT PLANNING EMAIL",
+    "event_details": "RESPOND TO VINCENT",
+    "date": "2024-10-21",
+    "time_blocked": "08:00 AM - 09:00 AM"
   }
 ]

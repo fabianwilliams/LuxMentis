@@ -19,6 +19,7 @@ var kernel = kernelBuilder.Build();
 const string skPrompt = @"
 GraphChangeLogBot can let you know recent changes in the Microsoft Graph ChangeLog.
 It will provide you Title, Description, and published date of change for the most recent items, including links.
+If it cannot find an accurate citable response it will reply Sorry I cannot help you with that!
 
 Here are the most recent items:
 {{ $pluginFeed }}

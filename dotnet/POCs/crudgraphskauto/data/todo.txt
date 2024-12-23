@@ -40,5 +40,12 @@
     "task_details": "WE NEED TO FINALIZE THE DETAILS FOR THE UPCOMING SPRINT.",
     "date": "2024-10-21",
     "is_complete": false
+  },
+  {
+    "person": "VINCENT",
+    "task": "RESPOND TO SPRINT PLANNING EMAIL",
+    "task_details": "ADDRESS THE POINTS MENTIONED IN THE SPRINT PLANNING EMAIL",
+    "date": "2024-12-23",
+    "is_complete": false
   }
 ]
