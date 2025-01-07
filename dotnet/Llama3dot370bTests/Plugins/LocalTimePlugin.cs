@@ -5,16 +5,12 @@ namespace LLAMA3DOT370BTESTS.Plugins
 {
     public sealed class LocalTimePlugin
     {
-        [KernelFunction, Description("Retrieves the current date in YYYY-MM-DD format.")]
+        [KernelFunction, Description("Retrieves the current time in EST.")]
         public static string GetCurrentLocalDate()
         {
-            return DateTime.Now.ToString("yyyy-MM-dd");
-        }
-
-        [KernelFunction, Description("Gets the future date by adding a number of days to the current date.")]
-        public static string GetFutureDate(int days)
-        {
-            return DateTime.Now.AddDays(days).ToString("yyyy-MM-dd");
+            var estZone = TimeZoneInfo.FindSystemTimeZoneById("Eastern Standard Time");
+            var estTime = TimeZoneInfo.ConvertTime(DateTime.Now, estZone);
+            return $"{estTime:yyyy-MM-dd HH:mm:ss} (EST)";
         }
     }
 }

@@ -31,7 +31,10 @@ class Program
 
         // Initialize kernel for local models
         var endpoint = new Uri("http://localhost:11434/v1");
-        var modelId = "llama3.3:latest";
+        var modelId = "llama3.3:latest"; // is faster gives better results and yes also does tool calling
+        //var modelId = "llama3.1:70b"; //Will give slower responses but does DO tool calling come to find out
+        //var modelId = "phi3:14b";  // Will not work becausae there is 'stated' no Tool calling support
+        //var modelId = "reflection:latest"; // as above
         var weatherApiKey = _configuration["WeatherAPI:weatherApiKey"];
 
         var builder = Kernel.CreateBuilder()
@@ -86,7 +89,6 @@ class Program
             await InvokeAgentAsync(userInput);
         }
 
-        // Local function to invoke agent and display the conversation messages.
         async Task InvokeAgentAsync(string question)
         {
             chat.AddChatMessage(new ChatMessageContent(AuthorRole.User, question));
@@ -94,8 +96,22 @@ class Program
 
             try
             {
-                // Stream response as chunks
-                await foreach (var chunk in agent.Kernel.InvokePromptStreamingAsync(question, new(settings)))
+                // Step 1: Initial Plugin Invocation (Non-Streaming)
+                var initialResponse = await agent.Kernel.InvokePromptAsync(
+                    question,
+                    new KernelArguments(settings)
+                );
+
+                // Print the result immediately from the tool/plugin
+                Console.Write(initialResponse);
+
+                // Step 2: Stream additional assistant commentary with explicit context
+                string continuationPrompt = $"{initialResponse}\nPlease continue elaborating without repeating previous plugin calls. Be brief in response";
+
+                await foreach (var chunk in agent.Kernel.InvokePromptStreamingAsync(
+                    continuationPrompt,
+                    new KernelArguments()  // Avoid additional plugin triggers
+                ))
                 {
                     Console.Write(chunk);
                 }
@@ -108,8 +124,8 @@ class Program
             {
                 _logger.LogError($"An error occurred during streaming: {ex.Message}");
             }
-            
-            Console.WriteLine();  // Ensure to print a new line after response completes
+
+            Console.WriteLine();
         }
     }
 }

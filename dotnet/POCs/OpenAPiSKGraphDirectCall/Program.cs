@@ -48,20 +48,20 @@ class Program
                 Timeout = TimeSpan.FromMinutes(5)
             };       
 
-        
+        /*
         // Initialize kernel for local models
         var endpoint = new Uri("http://localhost:11434/v1");
-        var modelId = "llama3.3:latest";
-        //var modelId = "reflection:latest";
-
-
+        var modelId = "llama3.3:latest"; // is faster gives better results and yes also does tool calling
+        //var modelId = "llama3.1:70b"; //Will give slower responses but does DO tool calling come to find out
+        //var modelId = "phi3:14b";  // Will not work becausae there is 'stated' no Tool calling support
+        //var modelId = "reflection:latest"; // as above
 
         var builder = Kernel.CreateBuilder()
             .AddOpenAIChatCompletion(modelId: modelId, apiKey: null, endpoint: endpoint, httpClient: httpClient);
-        
-        
+        */
 
-        /*
+
+        
         // Initialize Kernel using OpenAI models
         var apikey = _configuration["OpenAI:ApiKey"];
         var modelId = "gpt-4o";
@@ -69,7 +69,7 @@ class Program
         var builder = Kernel.CreateBuilder()
             .AddOpenAIChatCompletion(modelId: modelId, apiKey: apikey, httpClient: httpClient);  
         
-        */
+        
         
         var kernel = builder.Build();
 
@@ -152,15 +152,17 @@ class Program
 
     static async Task PerformChatCompletion(Kernel kernel)
     {
-        /*
+        
         string prompt = @"
         Give me informaiton about Keyser in a tabular format please
         ";
-        */
+        
 
+        /*
         string prompt = @"
         What can you tell me about whats in my Calendar
         ";
+        */
 
         /*
         // Create the prompt asking about the latest email
