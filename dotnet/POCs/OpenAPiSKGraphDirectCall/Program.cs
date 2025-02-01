@@ -48,20 +48,23 @@ class Program
                 Timeout = TimeSpan.FromMinutes(5)
             };       
 
-        /*
+        
         // Initialize kernel for local models
         var endpoint = new Uri("http://localhost:11434/v1");
-        var modelId = "llama3.3:latest"; // is faster gives better results and yes also does tool calling
-        //var modelId = "llama3.1:70b"; //Will give slower responses but does DO tool calling come to find out
+        //var modelId = "llama3.3:latest"; // is faster gives better results and yes also does tool calling
+        var modelId = "llama3.3:70b"; //Will give slower responses but does DO tool calling come to find out
+        //var modelId = "qwq:32b-preview-fp16"; //testing my latest Llama local model ..does not work fails at invocation of InovkePrompt..Async
+        //var modelId = "deepseek-r1:70b"; //testing deepseek r1 ... alas DOES NOT support tool calling per errormsg
+        //var modelId = "phi4:14b-fp16"; // also fails with 400 registry.ollama.ai/library/phi4:14b-fp16 does not support tools
         //var modelId = "phi3:14b";  // Will not work becausae there is 'stated' no Tool calling support
         //var modelId = "reflection:latest"; // as above
 
         var builder = Kernel.CreateBuilder()
             .AddOpenAIChatCompletion(modelId: modelId, apiKey: null, endpoint: endpoint, httpClient: httpClient);
-        */
-
-
         
+        
+        
+        /*
         // Initialize Kernel using OpenAI models
         var apikey = _configuration["OpenAI:ApiKey"];
         var modelId = "gpt-4o";
@@ -69,7 +72,7 @@ class Program
         var builder = Kernel.CreateBuilder()
             .AddOpenAIChatCompletion(modelId: modelId, apiKey: apikey, httpClient: httpClient);  
         
-        
+        */
         
         var kernel = builder.Build();
 
@@ -153,10 +156,11 @@ class Program
     static async Task PerformChatCompletion(Kernel kernel)
     {
         
+        /*
         string prompt = @"
         Give me informaiton about Keyser in a tabular format please
         ";
-        
+        */
 
         /*
         string prompt = @"
@@ -165,25 +169,40 @@ class Program
         */
 
         /*
+        string prompt = @"
+        Add a new Event to my Calendar with Subject Meet Barry about Testing and with a Start at 9 am and a stop at 9:30
+        ";
+        */
+
+        
+        string prompt = @"
+        Hey, I need some help.
+        Can you tell me what the last 2 emails in my inbox only from Keyser?";
+        
+
+        
+        /*
         // Create the prompt asking about the latest email
         //THIS WORKS and is tested
         string prompt = @"
         Hey, I need some help.
-        Can you tell me what the last 2 emails in my inbox only from Keyser?
+        Can you tell me what the last email in my inbox only from KEYSER?
         Please summarize the details for me as concise as possible
-        Whats important is who the sender is and their email address along with when it was sent subject and
-        brief description of the ask. Give me in readable markdown";
+        Send that summary as the body immideately to jahmekyanbwoy@gmail.com with
+        an appropriate Subject";
         */
 
         /*
         //Check to see if multiple can be called starting with contacts
+        //This prompt works on gpt-4o
         string prompt = @"
         Hey, I need some help.
-        I saw Fabs today thought I met him before
-        can you give his information please
-        and remind me do I have any meetings with him or emails from fabsgwill@gmail.com
+        I saw Keyser Soze today thought I met him before
+        can you give me his information please
+        and remind me do I have any meetings with Keyser as well
         I forgot";
         */
+        
 
         /*
         //Create a prompt that sends an email
