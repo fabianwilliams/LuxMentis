@@ -14,19 +14,23 @@ internal class Program
             .SetBasePath(Directory.GetCurrentDirectory())
             .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
         _configuration = configurationBuilder.Build();
-        
-        var kernelBuilder = Kernel.CreateBuilder();
 
         // Initialize Kernel using OpenAI models
         var apikey = _configuration["OpenAI:ApiKey"];
         var modelId = "gpt-4o";
+        
+        var kernelBuilder = Kernel.CreateBuilder();
 
-        //TODO - Add Services
+        //TODO - Add Services in this case the OpenAIChatCompletionService
         kernelBuilder.AddOpenAIChatCompletion(modelId: modelId, apikey);
 
         //TODO - Add Plugins
+        //kernelBuilder.AddPlugin<PluginType>(); but done in the "better" Project sample
+
+        //Build the Kernel
         Kernel kernel = kernelBuilder.Build();
 
+        //Get the Service you want to use in this case the ChatCompletionService
         var chatService = kernel.GetRequiredService<IChatCompletionService>(); //This is the service that will be used to send the messages to the LLM
 
         // Lets create a ChatHistory Object because this thing has no memory unless you keep adding to it

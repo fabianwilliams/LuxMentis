@@ -164,7 +164,7 @@ internal class Program
             Console.WriteLine();
         }
     }
-        #region MagicDoNotLookUnderTheHood
+    #region MagicDoNotLookUnderTheHood
     private static readonly HashSet<string> s_fieldsToIgnore = new(
         [
             "@odata.type",
