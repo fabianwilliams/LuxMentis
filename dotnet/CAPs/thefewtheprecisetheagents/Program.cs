@@ -52,6 +52,7 @@ internal class Program
         const string ContactsName = "ContactsAgent";
         const string CalendarName = "CalendarAgent";
         const string EmailName = "EmailAgent";
+        const string LegalSecretaryName = "LegalSecretaryAgent";
 
         // Define Chief of Staff Agent
         ChatCompletionAgent chiefOfStaffAgent = new()
@@ -77,6 +78,7 @@ internal class Program
             Arguments = new KernelArguments(
                 new AzureOpenAIPromptExecutionSettings()
                 {
+                    //FunctionChoiceBehavior = FunctionChoiceBehavior.Required(null)
                     FunctionChoiceBehavior = FunctionChoiceBehavior.Auto()
                 })
         };
@@ -115,6 +117,30 @@ internal class Program
             Kernel = kernel,
         };
 
+        // Define Legal Secretary Agent
+        ChatCompletionAgent legalSecretaryAgent = new()
+        {
+            Name = LegalSecretaryName,
+            Instructions =
+                """
+                You are the Legal Secretary Agent. Your role is to ensure that responses are:
+                - Free from **bank account information, Social Security numbers, or ID numbers**.
+                - Written in **proper English** with **clear and professional wording**.
+                - **Translated into French** at the bottom for multinational teams.
+
+                **Rules:**
+                - **If you find any restricted information, redact it immediately.**
+                - **If the English text is unclear or incorrect, rewrite it for clarity.**
+                - **At the end of each response, provide a French translation.**
+
+                **Example Response Format:**
+                - **English Response**: (Corrected content here)
+                - **French Translation**: (Translated content here)
+                """,
+            Kernel = kernel
+        };
+
+
         // Define Selection Strategy (Which Agent Speaks Next?)
         KernelFunction selectionFunction =
             AgentGroupChat.CreatePromptFunctionForStrategy(
@@ -127,16 +153,17 @@ internal class Program
                 - {{{ContactsName}}}
                 - {{{CalendarName}}}
                 - {{{EmailName}}}
+                - {{{LegalSecretaryName}}}
                 - {{{ChiefOfStaffName}}}
 
                 Always follow these rules when choosing the next participant:
-                - If RESPONSE is user input, it is the Chief of Staff Agent's turn.
-                - If RESPONSE is by the Chief of Staff Agent, analyze the request:
-                    - If it involves **contacts**, choose {{{ContactsName}}}.
-                    - If it involves **calendar**, choose {{{CalendarName}}}.
-                    - If it involves **email**, choose {{{EmailName}}}.
-                - If RESPONSE is by a specialized agent (Contacts, Calendar, or Email), it is the Chief of Staff Agent's turn.
-                - If Chief of Staff determines the request is fully refined, execution will begin.
+                - If RESPONSE is user input, analyze the message:
+                    - If it contains words like **"contact"**, **"phone number"**, **"address book"**, choose {{{ContactsName}}}.
+                    - If it contains words like **"calendar"**, **"meeting"**, **"event"**, choose {{{CalendarName}}}.
+                    - If it contains words like **"email"**, **"inbox"**, **"send mail"**, choose {{{EmailName}}}.
+                - If RESPONSE is by a specialized agent (Contacts, Calendar, or Email), the **next step MUST be {{{LegalSecretaryName}}} **.
+                - If RESPONSE is by LegalSecretaryAgent, return to the Chief of Staff Agent.
+                - If the topic is unclear, default to the Chief of Staff Agent.
 
                 RESPONSE:
                 {{$lastmessage}}
@@ -144,13 +171,18 @@ internal class Program
                 safeParameterNames: "lastmessage"
             );
 
+
+
+
         // Define Termination Strategy (When to Stop)
         const string TerminationToken = "yes";
 
         KernelFunction terminationFunction =
             AgentGroupChat.CreatePromptFunctionForStrategy(
                 $$$"""
-                Examine the RESPONSE and determine whether the content has been deemed satisfactory.
+                Examine the RESPONSE and provide at least 1 suggestion the first pass
+                The RESPONSE must have a french translation at the end. 
+                Then determine whether the content has been deemed satisfactory.
                 If content is satisfactory, respond with a single word without explanation: {{{TerminationToken}}}.
                 If specific suggestions are being provided, it is not satisfactory.
                 If no correction is suggested, it is satisfactory.
@@ -166,7 +198,7 @@ internal class Program
 
         // Define the Agent Group Chat
         AgentGroupChat chat =
-            new(chiefOfStaffAgent, contactsAgent, calendarAgent, emailAgent)
+            new(chiefOfStaffAgent, contactsAgent, calendarAgent, emailAgent, legalSecretaryAgent)
             {
                 ExecutionSettings = new AgentGroupChatSettings
                 {
@@ -180,7 +212,13 @@ internal class Program
                             // Set prompt variable for tracking
                             HistoryVariableName = "lastmessage",
                             // Extract agent name from result
-                            ResultParser = (result) => result.GetValue<string>() ?? chiefOfStaffAgent.Name
+                            //ResultParser = (result) => result.GetValue<string>() ?? chiefOfStaffAgent.Name
+                            ResultParser = (result) =>
+                            {
+                                var selectedAgent = result.GetValue<string>() ?? chiefOfStaffAgent.Name;
+                                Console.WriteLine($"🔍 Debug: Selection Strategy chose {selectedAgent}");
+                                return selectedAgent;
+                            }
                         },
                     TerminationStrategy =
                         new KernelFunctionTerminationStrategy(terminationFunction, kernel)
@@ -192,7 +230,7 @@ internal class Program
                             // Set prompt variable for tracking
                             HistoryVariableName = "lastmessage",
                             // Limit total turns to avoid infinite loops
-                            MaximumIterations = 12,
+                            MaximumIterations = 5,
                             // Determines if the process should exit
                             ResultParser = (result) =>
                                 result.GetValue<string>()?.Contains(TerminationToken, StringComparison.OrdinalIgnoreCase) ?? false
@@ -309,10 +347,25 @@ internal class Program
 
             try
             {
+                Console.WriteLine("🟡 Debug: Invoking chat...");
                 await foreach (ChatMessageContent response in chat.InvokeAsync())
                 {
-                    Console.WriteLine();
+                    Console.WriteLine($"🟢 Debug: {response.AuthorName} responded");
                     Console.WriteLine($"{response.AuthorName.ToUpperInvariant()}:{Environment.NewLine}{response.Content}");
+
+                    // ✅ Explicitly check if a specialized agent is responding
+                    if (response.AuthorName.Equals("ContactsAgent", StringComparison.OrdinalIgnoreCase))
+                    {
+                        Console.WriteLine("🔍 Debug: ContactsAgent is processing this request.");
+                    }
+                    else if (response.AuthorName.Equals("CalendarAgent", StringComparison.OrdinalIgnoreCase))
+                    {
+                        Console.WriteLine("🔍 Debug: CalendarAgent is processing this request.");
+                    }
+                    else if (response.AuthorName.Equals("EmailAgent", StringComparison.OrdinalIgnoreCase))
+                    {
+                        Console.WriteLine("🔍 Debug: EmailAgent is processing this request.");
+                    }
                 }
             }
             catch (Exception ex)
@@ -325,6 +378,7 @@ internal class Program
             }
         } while (!isComplete);
     }
+
 
     #region MagicDoNotLookUnderTheHood
     private static readonly HashSet<string> s_fieldsToIgnore = new(
