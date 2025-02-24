@@ -161,7 +161,7 @@ internal class Program
                     - If it contains words like **"contact"**, **"phone number"**, **"address book"**, choose {{{ContactsName}}}.
                     - If it contains words like **"calendar"**, **"meeting"**, **"event"**, choose {{{CalendarName}}}.
                     - If it contains words like **"email"**, **"inbox"**, **"send mail"**, choose {{{EmailName}}}.
-                - If RESPONSE is by a specialized agent (Contacts, Calendar, or Email), the **next step MUST be {{{LegalSecretaryName}}} **.
+                - If RESPONSE is by a specialized agent (Contacts, Calendar, or Email), the **next step MUST be the {{{LegalSecretaryName}}} **.
                 - If RESPONSE is by LegalSecretaryAgent, return to the Chief of Staff Agent.
                 - If the topic is unclear, default to the Chief of Staff Agent.
 
@@ -181,7 +181,7 @@ internal class Program
             AgentGroupChat.CreatePromptFunctionForStrategy(
                 $$$"""
                 Examine the RESPONSE and provide at least 1 suggestion the first pass
-                The RESPONSE must have a french translation at the end. 
+                The RESPONSE must have both an English AND French version at the end. 
                 Then determine whether the content has been deemed satisfactory.
                 If content is satisfactory, respond with a single word without explanation: {{{TerminationToken}}}.
                 If specific suggestions are being provided, it is not satisfactory.
@@ -320,7 +320,7 @@ internal class Program
         do
         {
             Console.WriteLine();
-            Console.Write("> ");
+            Console.Write("How may I help you? > ");
             string input = Console.ReadLine();
             if (string.IsNullOrWhiteSpace(input))
             {
