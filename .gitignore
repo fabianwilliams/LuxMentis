@@ -399,3 +399,48 @@ FodyWeavers.xsd
 
 # JetBrains Rider
 *.sln.iml
+
+# Ignore Python virtual environments (common names)
+venv/
+.env/
+env/
+.venv/
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Ignore Python bytecode and cache files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Ignore Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# Ignore Python test and coverage reports
+.tox/
+.nox/
+coverage/
+htmlcov/
+*.cover
+*.py,cover
+*.hypothesis/
+
+# Ignore SQLite database files
+*.sqlite3
+*.db
+
+# Ignore Python package builds
+build/
+dist/
+*.egg-info/
+*.egg
+
+# Ignore logs
+logs/
+*.log
+
+# Ignore security-sensitive environment files
+.env
+.env.local
+.env.*.local
+.envrc

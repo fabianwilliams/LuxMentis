@@ -1,0 +1,7 @@
+### Test OpenAI FastAPI Chatbot
+POST http://127.0.0.1:8000/chat
+Content-Type: application/json
+
+{
+    "message": "Tell me a fun fact about AI!"
+}
