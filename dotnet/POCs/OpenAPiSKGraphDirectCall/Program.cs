@@ -51,8 +51,9 @@ class Program
         
         // Initialize kernel for local models
         var endpoint = new Uri("http://localhost:11434/v1");
+        var modelId = "cogito:70b"; // using Cohere local model
         //var modelId = "llama3.3:latest"; // is faster gives better results and yes also does tool calling
-        var modelId = "llama3.3:70b"; //Will give slower responses but does DO tool calling come to find out
+        //var modelId = "llama3.3:70b"; //Will give slower responses but does DO tool calling come to find out
         //var modelId = "qwq:32b-preview-fp16"; //testing my latest Llama local model ..does not work fails at invocation of InovkePrompt..Async
         //var modelId = "deepseek-r1:70b"; //testing deepseek r1 ... alas DOES NOT support tool calling per errormsg
         //var modelId = "phi4:14b-fp16"; // also fails with 400 registry.ollama.ai/library/phi4:14b-fp16 does not support tools
@@ -156,11 +157,12 @@ class Program
     static async Task PerformChatCompletion(Kernel kernel)
     {
         
-        /*
+        
         string prompt = @"
-        Give me informaiton about Keyser in a tabular format please
+        you have access to the Contacts Plugin. You are already Authenticated and have a Token. Use the Plugin and Give me informaiton about my contact Keyser Soze please.
+         Do not ask me for anything else, just execute the plugin and give me the result.
         ";
-        */
+        
 
         /*
         string prompt = @"
@@ -174,11 +176,11 @@ class Program
         ";
         */
 
-        
+        /*
         string prompt = @"
         Hey, I need some help.
         Can you tell me what the last 2 emails in my inbox only from Keyser?";
-        
+        */
 
         
         /*

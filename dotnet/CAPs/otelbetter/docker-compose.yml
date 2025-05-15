@@ -1,0 +1,8 @@
+version: '3.4'
+services:
+  otel-dashboard:
+    image: mcr.microsoft.com/dotnet/aspire-dashboard:8.0
+    container_name: otel-dashboard
+    ports:
+      - "18888:18888"  # Web UI
+      - "18889:18889"  # OTLP receiver

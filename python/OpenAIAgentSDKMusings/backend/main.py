@@ -45,7 +45,7 @@ async def generate_stream(request: ChatRequest):
     # Call OpenAI API with full chat history
     response = client.chat.completions.create(
         model="gpt-4o",
-        messages=messages,  # ✅ Use chat history for context
+        messages=messages,  #Use chat history for context
         stream=True
     )
 
