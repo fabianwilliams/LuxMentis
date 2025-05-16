@@ -17,6 +17,8 @@ using System.Text.Json.Nodes;
 using OpenTelemetry;
 using OpenTelemetry.Trace;
 using OpenTelemetry.Resources;
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Logs;
 using System.Diagnostics;
 using OtelBetter;
 
@@ -36,34 +38,59 @@ internal class Program
             .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
         _configuration = configurationBuilder.Build();
 
-        var loggerFactory = LoggerFactory.Create(builder =>
-        {
-            builder.AddConsole();
-        });
-        _logger = loggerFactory.CreateLogger<Program>();
-        var bearerLogger = loggerFactory.CreateLogger<BearerAuthenticationProviderWithCancellationToken>();
-
-        _bearerAuthenticationProviderWithCancellationToken = new BearerAuthenticationProviderWithCancellationToken(_configuration, bearerLogger);
-
         // Initialize OpenTelemetry
         var serviceName = "SemanticKernelConsoleApp";
         var serviceVersion = "1.0.0";
 
         _activitySource = new ActivitySource(serviceName);
 
-        // Keep this global if you want to use it throughout the app
-        using var tracerProvider = Sdk.CreateTracerProviderBuilder()
-            .AddSource(serviceName)
-            .SetResourceBuilder(ResourceBuilder.CreateDefault()
-                .AddService(serviceName: serviceName, serviceVersion: serviceVersion))
+        // ✅ Logs: initialize just once and use for all loggers
+        var loggerFactory = LoggerFactory.Create(builder =>
+        {
+            builder
+                .AddConsole()
+                .AddOpenTelemetry(logging =>
+                {
+                    logging.IncludeScopes = true;               // Required for correlation
+                    logging.IncludeFormattedMessage = true;     // Optional but useful
+                    logging.ParseStateValues = true;            // Optional, enriches logs
+                    logging.SetResourceBuilder(
+                        ResourceBuilder.CreateDefault()
+                            .AddService("otelbetter"));
+                    logging.AddConsoleExporter(); // Optional
+                    logging.AddOtlpExporter(opt =>
+                    {
+                        opt.Endpoint = new Uri("http://localhost:18889");
+                    });
+                });
+        });
+
+        _logger = loggerFactory.CreateLogger<Program>();
+        var bearerLogger = loggerFactory.CreateLogger<BearerAuthenticationProviderWithCancellationToken>();
+
+        _bearerAuthenticationProviderWithCancellationToken = new BearerAuthenticationProviderWithCancellationToken(_configuration, bearerLogger);
+
+        // ✅ Tracing
+        Sdk.CreateTracerProviderBuilder()
+            .AddSource("Copilot-Agent-Plugins") // Optional: SK plugin spans if you add them
             .AddHttpClientInstrumentation()
-            .AddConsoleExporter()
-            .AddOtlpExporter(otlp =>
+            .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService("otelbetter"))
+            .AddOtlpExporter(opt =>
             {
-                otlp.Endpoint = new Uri("http://localhost:18889"); // Aspire dashboard
+                opt.Endpoint = new Uri("http://localhost:18889");
             })
             .Build();
 
+        // ✅ Metrics
+        Sdk.CreateMeterProviderBuilder()
+            .AddRuntimeInstrumentation()
+            .AddHttpClientInstrumentation()
+            .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService("otelbetter"))
+            .AddOtlpExporter(opt =>
+            {
+                opt.Endpoint = new Uri("http://localhost:18889");
+            })
+            .Build();
 
         // Initialize the kernel with OpenAI and Graph authentication
         var kernel = await InitializeKernelAsync();
@@ -78,28 +105,35 @@ internal class Program
     {
         using var activity = _activitySource?.StartActivity("InitializeKernel", ActivityKind.Internal);
 
-        var apikey = _configuration["OpenAI:ApiKey"];
-        if (string.IsNullOrEmpty(apikey))
+        if (activity == null)
         {
-            _logger?.LogError("OpenAI API key is not configured.");
-            throw new InvalidOperationException("OpenAI API key is not configured.");
+            _logger?.LogWarning("Activity could not be started for InitializeKernel.");
         }
 
-        var modelId = "gpt-4o";
-        activity?.SetTag("openai.model", modelId);
+        using (_logger?.BeginScope(new Dictionary<string, object?>
+        {
+            ["TraceId"] = activity?.TraceId.ToString(),
+            ["SpanId"] = activity?.SpanId.ToString()
+        }))
+        {
+            var apikey = _configuration["OpenAI:ApiKey"];
+            if (string.IsNullOrEmpty(apikey))
+            {
+                _logger?.LogError("OpenAI API key is not configured.");
+                throw new InvalidOperationException("OpenAI API key is not configured.");
+            }
 
-        var kernelBuilder = Kernel.CreateBuilder()
-            .AddOpenAIChatCompletion(modelId: modelId, apiKey: apikey);
+            var modelId = "gpt-4o";
+            activity?.SetTag("openai.model", modelId);
 
-        var kernel = kernelBuilder.Build();
+            var kernelBuilder = Kernel.CreateBuilder()
+                .AddOpenAIChatCompletion(modelId: modelId, apiKey: apikey);
 
-        //kernel.FunctionInvocationFilters.Add(new FunctionTracingFilter(_activitySource));
-        //kernel.AutoFunctionInvocationFilters.Add(new ExpectedSchemaFunctionFilter()); 
+            var kernel = kernelBuilder.Build();
 
-
-        return kernel;
+            return kernel;
+        }
     }
-
 
     private static async Task LoadPluginsAsync(Kernel kernel)
     {
@@ -121,58 +155,66 @@ internal class Program
             activity?.SetTag("plugin.path", pluginPath);
             activity?.SetTag("plugin.manifestFile", manifestFile ?? "null");
 
-            if (string.IsNullOrEmpty(manifestFile))
+            using (_logger?.BeginScope(new Dictionary<string, object?>
             {
-                _logger?.LogWarning($"No manifest file found for plugin: {pluginName}. Ensure a file ending with '-apiplugin.json' exists in {pluginPath}.");
-                activity?.SetTag("plugin.load.success", false);
-                activity?.SetStatus(ActivityStatusCode.Error, "Manifest file missing");
-                continue;
-            }
-
-            try
+                ["TraceId"] = activity?.TraceId.ToString(),
+                ["SpanId"] = activity?.SpanId.ToString()
+            }))
             {
-                var copilotAgentPluginParameters = new CopilotAgentPluginParameters
+                if (string.IsNullOrEmpty(manifestFile))
                 {
-                    FunctionExecutionParameters = new()
-                    {
-                        {
-                            "https://graph.microsoft.com/v1.0",
-                            new OpenApiFunctionExecutionParameters(
-                                authCallback: Program._bearerAuthenticationProviderWithCancellationToken.AuthenticateRequestAsync,
-                                enableDynamicOperationPayload: false,
-                                enablePayloadNamespacing: true)
-                            {
-                                ParameterFilter = s_restApiParameterFilter
-                            }
-                        },
-                    },
-                };
-
-                var manifestPath = Path.GetFullPath(manifestFile);
-
-                if (!File.Exists(manifestPath))
-                {
-                    _logger?.LogError($"Manifest file not found: {manifestPath}");
+                    _logger?.LogWarning($"No manifest file found for plugin: {pluginName}. Ensure a file ending with '-apiplugin.json' exists in {pluginPath}.");
                     activity?.SetTag("plugin.load.success", false);
-                    activity?.SetStatus(ActivityStatusCode.Error, "Manifest file path invalid");
+                    activity?.SetStatus(ActivityStatusCode.Error, "Manifest file missing");
                     continue;
                 }
 
-                _logger?.LogInformation($"Loading plugin '{pluginName}' from {manifestPath}...");
+                try
+                {
+                    var copilotAgentPluginParameters = new CopilotAgentPluginParameters
+                    {
+                        FunctionExecutionParameters = new()
+                        {
+                            {
+                                "https://graph.microsoft.com/v1.0",
+                                new OpenApiFunctionExecutionParameters(
+                                    authCallback: Program._bearerAuthenticationProviderWithCancellationToken.AuthenticateRequestAsync,
+                                    enableDynamicOperationPayload: false,
+                                    enablePayloadNamespacing: true)
+                                {
+                                    ParameterFilter = s_restApiParameterFilter
+                                }
+                            },
+                        },
+                    };
 
-                await kernel.ImportPluginFromCopilotAgentPluginAsync(pluginName, manifestPath, copilotAgentPluginParameters);
+                    var manifestPath = Path.GetFullPath(manifestFile);
 
-                _logger?.LogInformation($"Plugin '{pluginName}' loaded successfully.");
-                activity?.SetTag("plugin.load.success", true);
-            }
-            catch (Exception ex)
-            {
-                _logger?.LogError(ex, $"Failed to load plugin '{pluginName}' from {manifestFile}.");
-                activity?.SetTag("plugin.load.success", false);
-                activity?.SetStatus(ActivityStatusCode.Error, ex.Message);
+                    if (!File.Exists(manifestPath))
+                    {
+                        _logger?.LogError($"Manifest file not found: {manifestPath}");
+                        activity?.SetTag("plugin.load.success", false);
+                        activity?.SetStatus(ActivityStatusCode.Error, "Manifest file path invalid");
+                        continue;
+                    }
+
+                    _logger?.LogInformation($"Loading plugin '{pluginName}' from {manifestPath}...");
+
+                    await kernel.ImportPluginFromCopilotAgentPluginAsync(pluginName, manifestPath, copilotAgentPluginParameters);
+
+                    _logger?.LogInformation($"Plugin '{pluginName}' loaded successfully.");
+                    activity?.SetTag("plugin.load.success", true);
+                }
+                catch (Exception ex)
+                {
+                    _logger?.LogError(ex, $"Failed to load plugin '{pluginName}' from {manifestFile}.");
+                    activity?.SetTag("plugin.load.success", false);
+                    activity?.SetStatus(ActivityStatusCode.Error, ex.Message);
+                }
             }
         }
     }
+
 
     private static async Task PromptLoopAsync(Kernel kernel)
     {
@@ -193,34 +235,43 @@ internal class Program
                 promptActivity?.SetTag("user.prompt", userInput);
                 promptActivity?.SetTag("timestamp", DateTime.UtcNow.ToString("o"));
 
-                try
+                using (_logger?.BeginScope(new Dictionary<string, object?>
                 {
-                    var promptExecutionSettings = new PromptExecutionSettings
+                    ["TraceId"] = promptActivity?.TraceId.ToString(),
+                    ["SpanId"] = promptActivity?.SpanId.ToString()
+                }))
+                {
+                    try
                     {
-                        FunctionChoiceBehavior = FunctionChoiceBehavior.Auto(
-                            options: new FunctionChoiceBehaviorOptions
-                            {
-                                AllowStrictSchemaAdherence = true
-                            })
-                    };
+                        var promptExecutionSettings = new PromptExecutionSettings
+                        {
+                            FunctionChoiceBehavior = FunctionChoiceBehavior.Auto(
+                                options: new FunctionChoiceBehaviorOptions
+                                {
+                                    AllowStrictSchemaAdherence = true
+                                })
+                        };
 
-                    var result = await kernel.InvokePromptAsync(
-                        userInput,
-                        new KernelArguments(promptExecutionSettings)
-                    ).ConfigureAwait(false);
+                        var result = await kernel.InvokePromptAsync(
+                            userInput,
+                            new KernelArguments(promptExecutionSettings)
+                        ).ConfigureAwait(false);
 
-                    var output = result?.ToString() ?? "[null]";
-                    promptActivity?.SetTag("result.length", output.Length);
-                    promptActivity?.SetStatus(ActivityStatusCode.Ok);
+                        var output = result?.ToString() ?? "[null]";
+                        promptActivity?.SetTag("result.length", output.Length);
+                        promptActivity?.SetStatus(ActivityStatusCode.Ok);
 
-                    Console.WriteLine("Response:");
-                    Console.WriteLine(output);
-                }
-                catch (Exception ex)
-                {
-                    _logger?.LogError(ex, "Error invoking the plugin.");
-                    promptActivity?.SetStatus(ActivityStatusCode.Error, ex.Message);
-                    Console.WriteLine("An error occurred while invoking the plugin. Please check the logs for details.");
+                        _logger?.LogInformation("Prompt completed successfully. Output: {Output}", output);
+
+                        Console.WriteLine("Response:");
+                        Console.WriteLine(output);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger?.LogError(ex, "Error invoking the plugin.");
+                        promptActivity?.SetStatus(ActivityStatusCode.Error, ex.Message);
+                        Console.WriteLine("An error occurred while invoking the plugin. Please check the logs for details.");
+                    }
                 }
             }
             else
@@ -231,6 +282,7 @@ internal class Program
             Console.WriteLine();
         }
     }
+
 
     #region MagicDoNotLookUnderTheHood
     private static readonly HashSet<string> s_fieldsToIgnore = new(
