@@ -21,6 +21,7 @@ using OpenTelemetry.Metrics;
 using OpenTelemetry.Logs;
 using System.Diagnostics;
 using OtelBetter;
+using Azure.Monitor.OpenTelemetry.Exporter;
 
 namespace OtelBetter;
 internal class Program
@@ -39,10 +40,13 @@ internal class Program
         _configuration = configurationBuilder.Build();
 
         // Initialize OpenTelemetry
-        var serviceName = "SemanticKernelConsoleApp";
+        var serviceName = "Copilot-Agent-Plugins";
         var serviceVersion = "1.0.0";
 
         _activitySource = new ActivitySource(serviceName);
+
+        var azureConnectionString = _configuration["Logging:APP_INSIGHTS_CONNECTION"];
+        var otlpEndpoint = new Uri("http://localhost:18889"); // Aspire dashboard
 
         // ✅ Logs: initialize just once and use for all loggers
         var loggerFactory = LoggerFactory.Create(builder =>
@@ -51,17 +55,16 @@ internal class Program
                 .AddConsole()
                 .AddOpenTelemetry(logging =>
                 {
-                    logging.IncludeScopes = true;               // Required for correlation
-                    logging.IncludeFormattedMessage = true;     // Optional but useful
-                    logging.ParseStateValues = true;            // Optional, enriches logs
-                    logging.SetResourceBuilder(
-                        ResourceBuilder.CreateDefault()
-                            .AddService("otelbetter"));
-                    logging.AddConsoleExporter(); // Optional
-                    logging.AddOtlpExporter(opt =>
-                    {
-                        opt.Endpoint = new Uri("http://localhost:18889");
-                    });
+                    logging.IncludeScopes = true;
+                    logging.IncludeFormattedMessage = true;
+                    logging.ParseStateValues = true;
+                    logging.SetResourceBuilder(ResourceBuilder.CreateDefault().AddService("otelbetter"));
+
+                    // Send to Aspire
+                    logging.AddOtlpExporter(opt => opt.Endpoint = otlpEndpoint);
+
+                    // Send to Azure Monitor
+                    logging.AddAzureMonitorLogExporter(opt => opt.ConnectionString = azureConnectionString);
                 });
         });
 
@@ -72,25 +75,31 @@ internal class Program
 
         // ✅ Tracing
         Sdk.CreateTracerProviderBuilder()
-            .AddSource("Copilot-Agent-Plugins") // Optional: SK plugin spans if you add them
-            .AddHttpClientInstrumentation()
-            .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService("otelbetter"))
-            .AddOtlpExporter(opt =>
-            {
-                opt.Endpoint = new Uri("http://localhost:18889");
-            })
-            .Build();
+        .AddSource("Copilot-Agent-Plugins")
+        .AddHttpClientInstrumentation()
+        .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService("otelbetter"))
+
+        // Send to Aspire
+        .AddOtlpExporter(opt => opt.Endpoint = otlpEndpoint)
+
+        // Send to Azure
+        .AddAzureMonitorTraceExporter(opt => opt.ConnectionString = azureConnectionString)
+
+        .Build();
 
         // ✅ Metrics
         Sdk.CreateMeterProviderBuilder()
-            .AddRuntimeInstrumentation()
-            .AddHttpClientInstrumentation()
-            .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService("otelbetter"))
-            .AddOtlpExporter(opt =>
-            {
-                opt.Endpoint = new Uri("http://localhost:18889");
-            })
-            .Build();
+        .AddRuntimeInstrumentation()
+        .AddHttpClientInstrumentation()
+        .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService("otelbetter"))
+
+        // Send to Aspire
+        .AddOtlpExporter(opt => opt.Endpoint = otlpEndpoint)
+
+        // Send to Azure
+        .AddAzureMonitorMetricExporter(opt => opt.ConnectionString = azureConnectionString)
+
+        .Build();
 
         // Initialize the kernel with OpenAI and Graph authentication
         var kernel = await InitializeKernelAsync();
