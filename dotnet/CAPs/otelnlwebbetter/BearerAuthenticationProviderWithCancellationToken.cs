@@ -37,7 +37,6 @@ public class BearerAuthenticationProviderWithCancellationToken
     private async Task<string> GetAccessTokenAsync(CancellationToken cancellationToken)
     {
         var scopes = new string[] { "https://graph.microsoft.com/.default" };
-
         try
         {
             _logger.LogInformation("Attempting to acquire token silently.");
